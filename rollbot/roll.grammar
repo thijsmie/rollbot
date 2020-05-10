@@ -1,0 +1,40 @@
+// ROLLER GRAMMAR
+
+%import common.CNAME -> NAME
+%import common.SIGNED_INT
+%import common.INT
+%import common.WS_INLINE
+%ignore WS_INLINE
+
+
+roll.6: INT? "d" INT
+
+?start: comp
+      | NAME "=" comp    -> assign_var
+
+?comp: sum
+    | comp ">" sum      -> greater
+    | comp "<" sum      -> smaller
+
+?sum: product
+    | sum "+" product   -> add
+    | sum "-" product   -> sub
+
+?product: atom
+    | product "*" atom  -> mul
+    | product "/" atom  -> div
+
+?atom: SIGNED_INT       -> number
+     | "-" atom         -> neg
+     | roll
+     | "average" comp      -> average
+     | "(" comp ")"
+     | "{" args+ "}"       -> pick
+     | NAME "(" args? ")"  -> func
+     | "&" NAME            -> var
+     | expl_exc_var
+     
+expl_exc_var: NAME
+
+?args: comp
+    | comp "," args
