@@ -58,25 +58,21 @@ async def on_message(message):
             resp = await handle_message_command(message.content[1:], env, message.channel)
         except Exception:
             print(traceback.format_exc())
-            await message.channel.send("=ERROR")
+            await message.channel.send(f"{message.author.display_name}: ERROR")
             return
-        await message.channel.send("=" + resp)
+        await message.channel.send(f"{message.author.display_name}: {resp}")
         return
 
     # parse any [] pairs
-    resp = ""
     for match in re.finditer(command, message.content):
         try:
             data = match.group(1).strip()
             resp = await handle_message_command(data, env, message.channel)
+            await message.channel.send(f"{message.author.display_name}: {resp}")
         except Exception:
             # Something caused an error, let the user know. Retain full error in logs
             print(traceback.format_exc())
-            resp += "[ERROR] "
-
-    if resp != "":
-        # Only send something if we have something to send.
-        await message.channel.send(resp)
+            await message.channel.send(f"{message.author.display_name}: ERROR")
 
 
 @client.event
