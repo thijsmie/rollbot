@@ -8,5 +8,12 @@ from rollbot.config import Config
 
 config = Config("config/production.json")
 
+import logging
+logging.basicConfig(
+    level=logging.DEBUG,
+    format="%(asctime)s,%(msecs)d %(levelname)s: %(message)s",
+    datefmt="%H:%M:%S",
+)
+
 envs.set_db(config.db)
 client.run(config.token)
