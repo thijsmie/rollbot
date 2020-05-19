@@ -1,6 +1,6 @@
 # Roll-Bot
 
-A tabletop dice rolling bot, which can easily be deployed to Heroku.
+A tabletop dice rolling bot, which can easily be deployed to Heroku. You can also use the publicly hosted version. Go to [the rollbot website](https://tmiedema.com/rollbot) for more information.
 
 ## Configuration
 
