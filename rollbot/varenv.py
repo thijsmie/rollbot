@@ -13,7 +13,7 @@ class VarEnv:
             data = pickle.loads(f)
             for k, v in data.items():
                 self.items[k] = v
-        except (AttributeError, RedisError):
+        except (AttributeError, RedisError, TypeError):
             pass
 
     def set(self, key, value):
