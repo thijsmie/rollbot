@@ -9,7 +9,7 @@ config = Config("config/local.json")
 
 import logging
 logging.basicConfig(
-    level=logging.DEBUG,
+    level=logging.WARNING,
     format="%(asctime)s,%(msecs)d %(levelname)s: %(message)s",
     datefmt="%H:%M:%S",
 )

@@ -128,9 +128,6 @@ async def on_ready():
     print(client.user.name)
     print(client.user.id)
     print('------')
-
-    for g in client.guilds:
-        print(g.name)
-        
+    print(", ".join(str(g.name) for g in client.guilds))
     print('------')
 
