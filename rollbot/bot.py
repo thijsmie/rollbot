@@ -57,7 +57,7 @@ async def on_message(message):
         try:
             resp = await handle_message_command(message.content[1:], env, message.channel)
         except Exception:
-            print("Faulty command: {}".format(command))
+            print("Faulty command: {}".format(message.content))
             await message.channel.send(f"{message.author.display_name}: ERROR")
             return
         await message.channel.send(f"{message.author.display_name}: {resp}")
@@ -73,7 +73,7 @@ async def on_message(message):
             await message.channel.send(f"{message.author.display_name}: {resp}")
         except Exception:
             # Something caused an error, let the user know. Retain full error in logs
-            print("Faulty command: {}".format(command))
+            print("Faulty command: {}".format(match.group()))
             await message.channel.send(f"{message.author.display_name}: ERROR")
 
 
