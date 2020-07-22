@@ -122,33 +122,6 @@ async def on_guild_join(guild):
             return
     print("Could not say hello to {} sadly... :(".format(guild.name))
 
-
-async def just_once(guild):
-    # The bot has joined a new server, lets let them know what this bot can do
-    try:
-        if (await hello_server(guild.system_channel)):
-            return
-    except Exception:
-        pass
-
-    try:
-        if (await hello_server(guild.rules_channel)):
-            return
-    except Exception:
-        pass
-
-    try:
-        if (await hello_server(guild.public_updates_channel)):
-            return
-    except Exception:
-        pass
-
-    for channel in guild.text_channels:
-        if (await hello_server(channel)):
-            return
-    print("Could not say hello to {} sadly... :(".format(guild.name))
-
-
 @client.event
 async def on_ready():
     print('Logged in as')
@@ -158,7 +131,6 @@ async def on_ready():
 
     for g in client.guilds:
         print(g.name)
-        await just_once(g)
         
     print('------')
 
