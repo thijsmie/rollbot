@@ -45,8 +45,8 @@ async def on_message(message):
     if message.author == client.user:
         return
 
-    # we don't want the bot to reply to music bot
-    if message.author.id == 706570555834499153:
+    # we don't want the bot to reply to other bots
+    if message.author.bot:
         return
 
     # Obtain variable env for this user
@@ -75,6 +75,37 @@ async def on_message(message):
             # Something caused an error, let the user know. Retain full error in logs
             print("Faulty command: {}".format(match.group()))
             await message.channel.send(f"{message.author.display_name}: ERROR")
+
+
+hello_message = """
+To get started, try to roll some dice, just like this: [d20]! 
+
+If you need any help, check out [the website](https://tmiedema.com/rollbot)! You can find a bunch of links there, also including a link to the source code if you are interested. Suggestions for improvements are also very welcome!
+"""
+async def hello_server(channel):
+    if channel and channel.permissions_for(channel.guild.me).send_messages:
+        try:
+            await channel.send(embed=discord.Embed(title="Thank you for using roll-bot!", type="rich", description=hello_message.strip()))
+            print("Said hello to {}!".format(channel.guild.name))
+            return True
+        except Exception:
+            return False
+    return False
+
+
+@client.event
+async def on_guild_join(guild):
+    # The bot has joined a new server, lets let them know what this bot can do
+    if (await hello_server(guild.system_channel)):
+        return
+    if (await hello_server(guild.rules_channel)):
+        return
+    if (await hello_server(guild.public_updates_channel)):
+        return
+    for channel in guild.text_channels:
+        if (await hello_server(channel)):
+            return
+    print("Could not say hello to {} sadly... :(".format(guild.name))
 
 
 @client.event
