@@ -57,10 +57,11 @@ async def on_message(message):
         try:
             resp = await handle_message_command(message.content[1:], env, message.channel)
         except Exception:
-            print(traceback.format_exc())
+            print("Faulty command: {}".format(command))
             await message.channel.send(f"{message.author.display_name}: ERROR")
             return
         await message.channel.send(f"{message.author.display_name}: {resp}")
+        print("Successfull command: {}".format(resp))
         return
 
     # parse any [] pairs
@@ -68,10 +69,11 @@ async def on_message(message):
         try:
             data = match.group(1).strip()
             resp = await handle_message_command(data, env, message.channel)
+            print("Successfull command: {}".format(resp))
             await message.channel.send(f"{message.author.display_name}: {resp}")
         except Exception:
             # Something caused an error, let the user know. Retain full error in logs
-            print(traceback.format_exc())
+            print("Faulty command: {}".format(command))
             await message.channel.send(f"{message.author.display_name}: ERROR")
 
 
