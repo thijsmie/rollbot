@@ -96,12 +96,24 @@ async def hello_server(channel):
 @client.event
 async def on_guild_join(guild):
     # The bot has joined a new server, lets let them know what this bot can do
-    if (await hello_server(guild.system_channel)):
-        return
-    if (await hello_server(guild.rules_channel)):
-        return
-    if (await hello_server(guild.public_updates_channel)):
-        return
+    try:
+        if (await hello_server(guild.system_channel)):
+            return
+    except Exception:
+        pass
+
+    try:
+        if (await hello_server(guild.rules_channel)):
+            return
+    except Exception:
+        pass
+
+    try:
+        if (await hello_server(guild.public_updates_channel)):
+            return
+    except Exception:
+        pass
+        
     for channel in guild.text_channels:
         if (await hello_server(channel)):
             return
