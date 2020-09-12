@@ -1,4 +1,4 @@
 {
     "discord_token_env_var": "DISCORD_TOKEN",
-    "redis_url_env_var": "REDISCLOUD_URL"
+    "redis_url_env_var": "REDIS_URL"
 }
