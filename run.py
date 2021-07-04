@@ -8,9 +8,7 @@ config = Config("config/production.json")
 
 logging.basicConfig(
     level=logging.WARNING,
-    # Not printing the time here, since Heroku already adds the time to the logs.
-    format="%(levelname)s: %(message)s", 
-    datefmt="%H:%M:%S",
+    format="[%(levelname)s] %(asctime)s - %(message)s", 
 )
 
 envs.set_db(config.db)

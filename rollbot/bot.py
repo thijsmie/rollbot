@@ -1,4 +1,5 @@
-import traceback
+import textwrap
+import logging
 import re
 
 import discord
@@ -16,7 +17,6 @@ command = re.compile(r"\[([^\]]*)\]")
 
 # Provide a environment of variables for each user
 envs = VarEnvProvider()
-
 
 # Handle a bit of message
 async def handle_message_command(text, env, channel):
@@ -60,11 +60,10 @@ async def on_message(message):
         try:
             resp = await handle_message_command(message.content[1:], env, message.channel)
         except Exception:
-            print("Faulty command: {}".format(message.content))
+            logging.error("Faulty command: {}".format(message.content))
             await message.channel.send(f"{message.author.display_name}: ERROR")
             return
         await message.channel.send(f"{message.author.display_name}: {resp}")
-        print("Successfull command: {}".format(resp))
         return
 
     # parse any [] pairs
@@ -72,12 +71,17 @@ async def on_message(message):
         try:
             data = match.group(1).strip()
             resp = await handle_message_command(data, env, message.channel)
-            print("Successfull command: {}".format(resp))
             await message.channel.send(f"{message.author.display_name}: {resp}")
         except Exception:
-            # Something caused an error, let the user know. Retain full error in logs
-            print("Faulty command: {}".format(match.group()))
-            await message.channel.send(f"{message.author.display_name}: ERROR")
+            # Something caused an error. Determine if the bot was probably addressed
+            # By checking if there was any dice in the command
+            try:
+                data = match.group(1).strip()
+                if re.search("d\d", data):
+                    logging.error("Faulty command: {}".format(match.group()))
+                    await message.channel.send(f"{message.author.display_name}: ERROR")
+            except Exception:
+                pass
 
 
 hello_message = """
@@ -89,7 +93,7 @@ async def hello_server(channel):
     if channel and channel.permissions_for(channel.guild.me).send_messages:
         try:
             await channel.send(embed=discord.Embed(title="Thank you for using roll-bot!", type="rich", description=hello_message.strip()))
-            print("Said hello to {}!".format(channel.guild.name))
+            logging.warning("Said hello to {}!".format(channel.guild.name))
             return True
         except Exception:
             return False
@@ -99,6 +103,8 @@ async def hello_server(channel):
 @client.event
 async def on_guild_join(guild):
     # The bot has joined a new server, lets let them know what this bot can do
+    logging.warning(f"Joined new server '{guild.name}'")
+
     try:
         if (await hello_server(guild.system_channel)):
             return
@@ -120,14 +126,20 @@ async def on_guild_join(guild):
     for channel in guild.text_channels:
         if (await hello_server(channel)):
             return
-    print("Could not say hello to {} sadly... :(".format(guild.name))
+    logging.error("Could not say hello to {} sadly... :(".format(guild.name))
+
 
 @client.event
 async def on_ready():
-    print('Logged in as')
-    print(client.user.name)
-    print(client.user.id)
-    print('------')
-    print(", ".join(str(g.name) for g in client.guilds))
-    print('------')
+    names = ", ".join(str(g.name) for g in client.guilds)
+    txt = textwrap.wrap(names, width=120)
 
+    logging.warning(f"""
+--------------------------------------------------
+Logged in as {client.user.name} - {client.user.id}
+
+All guilds listed below
+--------------------------------------------------
+{txt}
+--------------------------------------------------
+    """)
