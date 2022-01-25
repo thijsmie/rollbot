@@ -16,7 +16,7 @@ if __name__ == "__main__":
         sys.exit(1)
 
     try:
-        xbins, data, num_rolls = distribute(expression, timedelta(seconds=1), env)
+        xbins, data, num_rolls = distribute(expression, timedelta(seconds=5), env)
     except EvaluationError as e:
         print(e.args[0])
         sys.exit(1)
