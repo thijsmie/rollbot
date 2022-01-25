@@ -1,15 +1,14 @@
-import asyncio  
 import logging
 
-from rollbot.bot import client, envs
+from rollbot.bot import bot
 from rollbot.config import Config
+
 
 config = Config("config/production.json")
 
 logging.basicConfig(
     level=logging.WARNING,
-    format="[%(levelname)s] %(asctime)s - %(message)s", 
+    format="[%(levelname)s] %(asctime)s - %(message)s",
 )
 
-envs.set_db(config.db)
-client.run(config.token)
+bot.run(config.token)

@@ -12,40 +12,23 @@ The same principle applies for `redis_url` and `redis_url_env_var`. Note that if
 
 ## Running Locally
 
-Make sure you have Python 3.8.2 installed locally, for example using [pyenv](https://github.com/pyenv/pyenv-installer) (be sure to check the [Common build problems](https://github.com/pyenv/pyenv/wiki/common-build-problems) page if you run into any issues). To push to Heroku, you'll need to install the [Heroku CLI](https://devcenter.heroku.com/articles/heroku-cli). Additionally, to make user variable environments you'll need to setup redis. I suggest you don't bother with this for your local testing setup. I use [pipenv](https://pipenv-fork.readthedocs.io/en/latest/) to manage dependencies. For just running it you can also revert back to plain pip though.
+Make sure you have Python 3.10 installed locally, for example using [pyenv](https://github.com/pyenv/pyenv-installer) (be sure to check the [Common build problems](https://github.com/pyenv/pyenv/wiki/common-build-problems) page if you run into any issues). To push to Heroku, you'll need to install the [Heroku CLI](https://devcenter.heroku.com/articles/heroku-cli). Additionally, to make user variable environments you'll need to setup redis. I suggest you don't bother with this for your local testing setup. To manage the dependencies I use [poetry](https://python-poetry.org/).
 
 ```sh
-$ git clone https://github.com/thijsmie/roll-bot.git
-$ cd roll-bot-standalone
+$ git clone https://github.com/thijsmie/rollbot.git
+$ cd rollbot
 
-# raw installing dependencies
-$ python3 -m venv roll-bot-standalone
-$ source roll-bot-standalone/bin/activate
-$ pip install -r requirements.txt
+# pyenv installing python
+$ pyenv install 3.10.2
+$ pyenv shell 3.10.2
 
-# pyenv installing dependencies
-$ pyenv install 3.8.2
-$ pyenv shell 3.8.2
-$ pyenv virtualenv roll-bot-standalone
-$ pyenv activate roll-bot-standalone
-$ pip install -r requirements.txt
+# installing dependencies
+$ pip install poetry
+$ poetry install
 
-# pyenv+pipenv installing dependencies
-$ pyenv install 3.8.2
-$ pyenv shell 3.8.2
-$ pip install pipenv
-$ pipenv install
-
-# raw running the app
-$ source roll-bot-standalone/bin/activate
+# running the app
+$ poetry shell
 $ python runlocal.py
-
-# pyenv running the app
-$ pyenv activate roll-bot-standalone
-$ python runlocal.py
-
-# pyenv+pipenv running the app
-$ pipenv run python runlocal.py
 ```
 
 Your app should now be running and announce its discord username.
@@ -57,8 +40,9 @@ First create a new app on heroku, using free dynos is fine. Provision the [Redis
 Then in the terminal run the following commands.
 
 ```sh
-$ heroku git:remote -a HerokuAppName 
+$ heroku git:remote -a HerokuAppName
 $ git push heroku master
 ```
 
 Your app should now be live.
+

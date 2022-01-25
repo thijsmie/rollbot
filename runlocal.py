@@ -1,18 +1,18 @@
-import sys
 import os
+import sys
+import logging
 sys.path.insert(0, os.getcwd())
 
-from rollbot.bot import client, envs
+from rollbot.bot import bot
 from rollbot.config import Config
+
 
 config = Config("config/local.json")
 
-import logging
 logging.basicConfig(
     level=logging.WARNING,
     format="%(asctime)s,%(msecs)d %(levelname)s: %(message)s",
     datefmt="%H:%M:%S",
 )
 
-envs.set_db(config.db)
-client.run(config.token)
+bot.run(config.token)

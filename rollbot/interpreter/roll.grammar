@@ -1,0 +1,55 @@
+// ROLLER GRAMMAR
+
+%import common.CNAME -> NAME
+%import common.INT
+%import common.WS_INLINE
+%import common.ESCAPED_STRING
+%ignore WS_INLINE
+
+
+var.1:  /\w+/
+roll.2: /[0-9]+d[0-9]+/
+sroll.2: /d[0-9]+/
+kroll.3: /[0-9]+d[0-9]+k[0-9]+/
+
+?expression: sum
+          | expression ">" sum       -> gt
+          | expression "==" sum      -> eq
+          | expression "<" sum       -> lt
+
+?sum: product
+   | sum "+" product   -> add
+   | sum "-" product   -> sub
+
+?product: atom
+       | product "*" atom  -> mul
+       | product "/" atom  -> div
+       | product "%" atom  -> mod
+
+?atom: INT                  -> number
+    | "-" atom              -> neg
+    | "{" args+ "}"         -> pick
+    | NAME "(" args? ")"    -> func
+    | "(" expression ")"    -> brace
+    | kroll
+    | roll
+    | sroll
+    | var
+
+?args: expression
+    | expression "," args
+
+?comment: ESCAPED_STRING
+
+?statement: expression                        -> s_value
+          | comment statement                 -> commentate
+          | statement ";" statement           -> statement_list
+          | NAME "&" "=" expression           -> value_assignment
+          | NAME "&" "=" "(" program ")"      -> p_value_assignment
+          | NAME     "=" expression           -> macro_assignment
+          | NAME     "=" "(" program ")"      -> macro_assignment
+
+?program: expression
+        | statement ";" expression  -> p_func
+
+?toplevel: statement

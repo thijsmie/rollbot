@@ -3,6 +3,7 @@ import json
 import os
 
 from .db import make_db
+from .varenv import var_env_provider
 
 
 class Config:
@@ -25,3 +26,5 @@ class Config:
             self.db = make_db(os.environ[config["redis_url_env_var"]])
         else:
             self.db = None
+
+        var_env_provider.set_db(self.db)
