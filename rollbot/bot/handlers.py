@@ -31,6 +31,7 @@ async def roll(context: Context, roll: str):
 async def distribution(context: Context, roll: str):
     env = get_var_env(context)
 
+    await context.defer()
     async with context.typing():
         try:
             png = await bake_distribution(roll, env)
@@ -43,8 +44,6 @@ async def distribution(context: Context, roll: str):
         except:
             result = "Server error"
         await context.respond(result)
-
-
 
 
 async def varlist(context: Context, roll: str):
