@@ -1,3 +1,4 @@
+from ast import expr_context
 import textwrap
 import logging
 
@@ -110,13 +111,17 @@ async def on_message(message):
     if update_level >= UPDATE_LVL:
         return
 
-    if message.content.startswith("="):
-        await message.channel.send(
-            embed=discord.Embed(
-                title="Rollbot has updated!",
-                type="rich",
-                description=text.update_text.strip(),
+    try:
+        if message.content.startswith("="):
+            await message.channel.send(
+                embed=discord.Embed(
+                    title="Rollbot has updated!",
+                    type="rich",
+                    description=text.update_text.strip(),
+                )
             )
-        )
-        env.set(f"GuildULVL[{message.guild.id}]", str(UPDATE_LVL))
-        var_env_provider.update(env)
+            env.set(f"GuildULVL[{message.guild.id}]", str(UPDATE_LVL))
+            var_env_provider.update(env)
+    except:
+        # We don't care if message.content is gone now
+        pass

@@ -32,7 +32,7 @@ helptext = """
 
 
 update_text = """
-    Rollbot has migrated to discord slash commands. From April the old message
+    Rollbot has migrated to discord slash commands. The old message
     intents in discord will no longer work, see [here](https://discord.com/blog/slash-commands-are-here).
     Use /roll from now on. This message will only be shown once.
     You might need to re-invite the bot to get the slash commands to work. You can do that [here](https://discord.com/api/oauth2/authorize?client_id=712234733542572063&permissions=2147534848&scope=bot%20applications.commands).

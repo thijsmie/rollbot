@@ -53,32 +53,50 @@ def visit_children_decor(func: _InterMethod) -> _InterMethod:
 
 
 class AnnotatedCalculateTree(Interpreter):
+    roll_complexity_limit = 100_000_000
+    single_roll_complexity = 10
+
     def __init__(self, env: VarEnv, depth=0):
         self._env: VarEnv = env
         self._depth = depth
+        self._complexity_counter = 0
         super().__init__()
+
+    def count_complexity(self, complexity):
+        self._complexity_counter += complexity
+        if self._complexity_counter > AnnotatedCalculateTree.roll_complexity_limit:
+            raise EvaluationError("Roll calculation timed out: complexity too high!")
 
     @visit_children_decor
     def roll(self, one: str):
-        a,b = one.split('d')
-        r = tuple(random.randint(1, int(b)) for _ in range(int(a)))
+        a,b = map(int, one.split('d'))
+        self.count_complexity(AnnotatedCalculateTree.single_roll_complexity * a * (b // 20 + 1))
+        r = tuple(random.randint(1, b) for _ in range(a))
         rt = tuple(str(v) for v in r)
         return sum(r), f"{one}{{{','.join(rt)}}}"
 
     @visit_children_decor
     def sroll(self, one: str):
-        b = one[1:]
-        r = random.randint(1, int(b))
+        b = int(one[1:])
+        self.count_complexity(AnnotatedCalculateTree.single_roll_complexity * (b // 20 + 1))
+        r = random.randint(1, b)
         return r, f"{one}{{{r}}}"
 
     @visit_children_decor
     def kroll(self, one: str):
-        a, cc = one.split('d')
-        b, c = cc.split('k')
+        a, cc = map(int, one.split('d'))
+        b, c = map(int, cc.split('k'))
         if c >= a:
             raise EvaluationError("Can't drop more than keeping.")
 
-        r = tuple(random.randint(1, int(b)) for _ in range(int(a)))
+        self.count_complexity(
+            # roll
+            AnnotatedCalculateTree.single_roll_complexity * a * (b // 20 + 1)
+            # sort
+            + a * a * 2
+        )
+
+        r = tuple(random.randint(1, b) for _ in range(a))
         r = tuple(sorted(r))
         border = int(a) - int(c)
         rl = r[:border]
@@ -89,60 +107,74 @@ class AnnotatedCalculateTree(Interpreter):
 
     @visit_children_decor
     def gt(self, one: Tuple[int, str], two: Tuple[int, str]):
+        self.count_complexity(1)
         descr = f"({one[1]} > {two[1]})"
         return (1 if one[0] > two[0] else 0), descr
 
     @visit_children_decor
     def lt(self, one: Tuple[int, str], two: Tuple[int, str]):
+        self.count_complexity(1)
         descr = f"({one[1]} < {two[1]})"
         return (1 if one[0] < two[0] else 0), descr
 
     @visit_children_decor
     def eq(self, one: Tuple[int, str], two: Tuple[int, str]):
+        self.count_complexity(1)
         descr = f"({one[1]} == {two[1]})"
         return (1 if one[0] == two[0] else 0), descr
 
     @visit_children_decor
     def add(self, one: Tuple[int, str], two: Tuple[int, str]):
-        descr = f"({one[1]} + {two[1]})"
+        self.count_complexity(1)
         return (one[0] + two[0]), f"{one[1]} + {two[1]}"
 
     @visit_children_decor
     def sub(self, one: Tuple[int, str], two: Tuple[int, str]):
+        self.count_complexity(1)
         return (one[0] - two[0]), f"{one[1]} - {two[1]}"
 
     @visit_children_decor
     def mul(self, one: Tuple[int, str], two: Tuple[int, str]):
+        self.count_complexity(1)
         return (one[0] * two[0]), f"{one[1]} \\* {two[1]}"
 
     @visit_children_decor
     def div(self, one: Tuple[int, str], two: Tuple[int, str]):
+        self.count_complexity(1)
         return (one[0] // two[0]), f"{one[1]} / {two[1]}"
 
     @visit_children_decor
     def mod(self, one: Tuple[int, str], two: Tuple[int, str]):
+        self.count_complexity(1)
         return (one[0] % two[0]), f"{one[1]} % {two[1]}"
 
     @visit_children_decor
     def brace(self, expression: Tuple[int, str]):
+        self.count_complexity(1)
         return one[0], f"({one[1]})"
 
     def number(self, tree):
+        self.count_complexity(1)
         return int(tree.children[0].value), tree.children[0].value
 
     @visit_children_decor
     def neg(self, one: Tuple[int, str]):
+        self.count_complexity(1)
         return -one[0], f"-{one[1]}"
 
     @visit_children_decor
     def pick(self, args):
+        self.count_complexity(10)
         args = flatten(args)
+        self.count_complexity(len(args))
         c = random.choice(args)
         return c[0], f"{{{c[1]}}}"
 
     @visit_children_decor
     def func(self, name: str, args):
+        self.count_complexity(10)
         args = flatten(args)
+        self.count_complexity(len(args))
         if name not in funcs:
             raise EvaluationError(f"No such function '{name}'")
 
@@ -152,6 +184,7 @@ class AnnotatedCalculateTree(Interpreter):
 
     @visit_children_decor
     def var(self, name: str):
+        self.count_complexity(5)
         if self._depth > 20:
             raise EvaluationError("Depth limit reached (is this a recursive call?)")
         data = self._env.get(name)
@@ -160,38 +193,48 @@ class AnnotatedCalculateTree(Interpreter):
         try:
             return int(data), f"_{name}_{{{data}}}"
         except:
+            self.count_complexity(100)
             tree = parser.parse(data, start='program')
-            val, desc = AnnotatedCalculateTree(self._env, self._depth + 1).visit(tree)
+            calculator = AnnotatedCalculateTree(self._env, self._depth + 1)
+            val, desc = calculator.visit(tree)
+            self.count_complexity(calculator.count_complexity)
             return val, f"*{name}*{{{desc}}}"
 
     @visit_children_decor
     def p_value(self, expression: Tuple[int, str]):
+        self.count_complexity(1)
         return expression[0], f"{expression[1]} -> **{expression[0]}**"
 
     @visit_children_decor
     def s_value(self, expression: Tuple[int, str]):
+        self.count_complexity(1)
         return f"{expression[1]} -> **{expression[0]}**"
 
     @visit_children_decor
     def commentate(self, comment, statement):
+        self.count_complexity(1)
         return f"{comment} {statement}"
 
     def statement_list(self, tree):
+        self.count_complexity(1)
         a = self.visit(tree.children[0])
         b = self.visit(tree.children[1])
         return f"{a}; {b}"
 
     @visit_children_decor
     def value_assignment(self, name: Token, expression: Tuple[int, str]):
+        self.count_complexity(5)
         self._env.set(name.value, str(expression[0]))
         return f"{name.value} = {{{expression[1]}}} -> **{expression[0]}**"
 
     @visit_children_decor
     def p_value_assignment(self, name: Token, program: Tuple[int, str]):
+        self.count_complexity(5)
         self._env.set(name.value, str(program[0]))
         return f"{name.value} &= ({{{program[1]}}}) -> **{program[1]}**"
 
     def macro_assignment(self, tree):
+        self.count_complexity(100)
         name = tree.children[0].value
         value = reconstructor.reconstruct(tree.children[1])
         self._env.set(name, value)
@@ -199,13 +242,13 @@ class AnnotatedCalculateTree(Interpreter):
 
     @visit_children_decor
     def p_func(self, statement: str, expression: Tuple[int, str]):
+        self.count_complexity(1)
         return expression[0], f"{statement}; {expression[1]} -> **{expression[0]}**"
 
     @visit_children_decor
     def t_program(self, program: Tuple[int, str]):
+        self.count_complexity(1)
         return program[1]
-
-
 
 def evaluate(text: str, env: VarEnv = None):
     env = env or VarEnv('test')
@@ -405,6 +448,12 @@ def distribute(text: str, timeout: timedelta = None, env: VarEnv = None, num_bin
     tree = parser.parse(text, start='expression')
     minv, maxv = MinMaxTree(env).visit(tree)
     tree = FastPreProc(env).transform(tree)
+
+    try:
+        # By evaluating once we ensure the expression does not exceed our complexity limit
+        evaluate(text, env)
+    except EvaluationError:
+        return None
 
     if minv == maxv:
         return None

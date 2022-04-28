@@ -7,7 +7,7 @@ from . import handlers
 @bot.slash_command(name="help")
 async def implement_help(context: Context):
     """Show the help message"""
-    await context.reply(text.helptext)
+    await context.respond(text.helptext)
 
 
 @bot.slash_command(name="roll")
