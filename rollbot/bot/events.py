@@ -10,8 +10,8 @@ from rollbot.varenv import var_env_provider
 
 @bot.event
 async def on_ready():
-    names = ", ".join(str(g.name) for g in bot.guilds)
-    txt = textwrap.wrap(names, width=120)
+    names = ";; ".join(str(g.name) for g in bot.guilds)
+    txt = "\n".join(textwrap.wrap(names, width=120))
 
     logging.warning(
         f"""
@@ -21,6 +21,8 @@ Logged in as {bot.user.name} - {bot.user.id}
 All guilds listed below
 --------------------------------------------------
 {txt}
+--------------------------------------------------
+That is {len(names)} guilds active!
 --------------------------------------------------
     """
     )

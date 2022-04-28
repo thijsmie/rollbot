@@ -225,12 +225,16 @@ class AnnotatedCalculateTree(Interpreter):
     def value_assignment(self, name: Token, expression: Tuple[int, str]):
         self.count_complexity(5)
         self._env.set(name.value, str(expression[0]))
+        if len(expression[1]) > 500:
+            return expression[0], f"{name.value} = [too long to render] -> **{expression[0]}**"
         return f"{name.value} = {{{expression[1]}}} -> **{expression[0]}**"
 
     @visit_children_decor
     def p_value_assignment(self, name: Token, program: Tuple[int, str]):
         self.count_complexity(5)
         self._env.set(name.value, str(program[0]))
+        if len(program[1]) > 500:
+            return f"{name.value} &= (too long to render) -> **{program[1]}**"
         return f"{name.value} &= ({{{program[1]}}}) -> **{program[1]}**"
 
     def macro_assignment(self, tree):
@@ -243,12 +247,15 @@ class AnnotatedCalculateTree(Interpreter):
     @visit_children_decor
     def p_func(self, statement: str, expression: Tuple[int, str]):
         self.count_complexity(1)
+        if len(expression[1]) > 500:
+            return expression[0], f"{statement}; [too long to render] -> **{expression[0]}**"
         return expression[0], f"{statement}; {expression[1]} -> **{expression[0]}**"
 
     @visit_children_decor
     def t_program(self, program: Tuple[int, str]):
         self.count_complexity(1)
         return program[1]
+
 
 def evaluate(text: str, env: VarEnv = None):
     env = env or VarEnv('test')
