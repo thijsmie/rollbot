@@ -22,7 +22,7 @@ All guilds listed below
 --------------------------------------------------
 {txt}
 --------------------------------------------------
-That is {len(names)} guilds active!
+That is {len(bot.guilds)} guilds active!
 --------------------------------------------------
     """
     )

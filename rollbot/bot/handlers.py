@@ -28,11 +28,17 @@ async def roll(context: Context, roll: str):
             logging.exception(e)
             result = "Server error"
 
-    await context.respond(result)
+    try:
+        await context.respond(result)
+    except Exception as e:
+        logging.exception(e)
+        await context.respond("Could not deliver result")
 
 
 async def distribution(context: Context, roll: str):
     env = get_var_env(context)
+
+    await context.defer()
 
     async with context.typing():
         try:
@@ -45,7 +51,12 @@ async def distribution(context: Context, roll: str):
             result = e.args[0]
         except:
             result = "Server error"
-    await context.respond(result)
+
+    try:
+        await context.respond(result)
+    except Exception as e:
+        logging.exception(e)
+        await context.respond("Could not deliver result")
 
 
 async def varlist(context: Context):
