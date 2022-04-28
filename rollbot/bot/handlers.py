@@ -1,6 +1,6 @@
 import discord
 import secrets
-import traceback
+import logging
 from lark.exceptions import UnexpectedInput
 
 from discord.ext.commands import Context
@@ -24,8 +24,8 @@ async def roll(context: Context, roll: str):
             result = e.args[0]
         except UnexpectedInput as e:
             result = f"Unexpected input: ```\n{e.get_context(roll)}```"
-        except:
-            traceback.print_exc()
+        except Exception as e:
+            logging.exception(e)
             result = "Server error"
 
     await context.respond(result)
