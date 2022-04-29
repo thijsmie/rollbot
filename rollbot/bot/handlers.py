@@ -16,17 +16,18 @@ def get_var_env(context: Context) -> VarEnv:
 async def roll(context: Context, roll: str):
     env = get_var_env(context)
 
-    async with context.typing():
-        try:
-            result = evaluate(roll, env)
-            var_env_provider.update(env)
-        except EvaluationError as e:
-            result = e.args[0]
-        except UnexpectedInput as e:
-            result = f"Unexpected input: ```\n{e.get_context(roll)}```"
-        except Exception as e:
-            logging.exception(e)
-            result = "Server error"
+    await context.defer()
+
+    try:
+        result = evaluate(roll, env)
+        var_env_provider.update(env)
+    except EvaluationError as e:
+        result = e.args[0]
+    except UnexpectedInput as e:
+        result = f"Unexpected input: ```\n{e.get_context(roll)}```"
+    except Exception as e:
+        logging.exception(e)
+        result = "Server error"
 
     try:
         await context.respond(result)
@@ -40,17 +41,16 @@ async def distribution(context: Context, roll: str):
 
     await context.defer()
 
-    async with context.typing():
-        try:
-            png = await bake_distribution(roll, env)
-            await context.respond(
-                file=discord.File(png, filename=f"{secrets.token_urlsafe(8)}.png")
-            )
-            return
-        except BakingError as e:
-            result = e.args[0]
-        except:
-            result = "Server error"
+    try:
+        png = await bake_distribution(roll, env)
+        await context.respond(
+            file=discord.File(png, filename=f"{secrets.token_urlsafe(8)}.png")
+        )
+        return
+    except BakingError as e:
+        result = e.args[0]
+    except:
+        result = "Server error"
 
     try:
         await context.respond(result)
