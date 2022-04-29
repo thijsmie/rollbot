@@ -203,11 +203,15 @@ class AnnotatedCalculateTree(Interpreter):
     @visit_children_decor
     def p_value(self, expression: Tuple[int, str]):
         self.count_complexity(1)
+        if len(expression[1]) > 500:
+            return expression[0], f"[too long to render] -> **{expression[0]}**"
         return expression[0], f"{expression[1]} -> **{expression[0]}**"
 
     @visit_children_decor
     def s_value(self, expression: Tuple[int, str]):
         self.count_complexity(1)
+        if len(expression[1]) > 500:
+            return f"[too long to render] -> **{expression[0]}**"
         return f"{expression[1]} -> **{expression[0]}**"
 
     @visit_children_decor
