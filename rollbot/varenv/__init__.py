@@ -29,7 +29,10 @@ class VarEnvProvider:
     def get(self, name: str) -> VarEnv:
         if not self.db:
             return VarEnv(name)
-        return VarEnv(name, self.db.get(f"VarEnv[{name}]") or {})
+        data = self.db.get(f"VarEnv[{name}]")
+        if not data:
+            return VarEnv(name)
+        return VarEnv(name, json.loads(data))
 
     def update(self, varenv: VarEnv):
         if varenv.dirty and self.db is not None:
