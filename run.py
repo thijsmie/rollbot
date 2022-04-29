@@ -7,7 +7,7 @@ from rollbot.config import Config
 config = Config("config/production.json")
 
 logging.basicConfig(
-    level=logging.WARNING,
+    level=logging.INFO,
     format="[%(levelname)s] %(asctime)s - %(message)s",
 )
 
