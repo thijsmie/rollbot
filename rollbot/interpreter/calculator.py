@@ -197,7 +197,7 @@ class AnnotatedCalculateTree(Interpreter):
             tree = parser.parse(data, start='program')
             calculator = AnnotatedCalculateTree(self._env, self._depth + 1)
             val, desc = calculator.visit(tree)
-            self.count_complexity(calculator.count_complexity)
+            self.count_complexity(calculator._complexity_counter)
             return val, f"*{name}*{{{desc}}}"
 
     @visit_children_decor
