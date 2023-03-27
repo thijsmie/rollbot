@@ -6,8 +6,8 @@ authors = ["Thijs Miedema <mail@tmiedema.com>"]
 license = "MIT"
 
 [tool.poetry.dependencies]
-python = "3.10.2"
-py-cord = {extras = ["speed"], git="https://github.com/Pycord-Development/pycord.git"}
+python = "^3.10.6"
+py-cord = {extras = ["speed"], version="^2.4.1"}
 numpy = "^1.22.1"
 matplotlib = "^3.5.1"
 lark-parser = "^0.12.0"
