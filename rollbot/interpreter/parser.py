@@ -8,5 +8,5 @@ with open(Path(__file__).resolve().parent / "roll.grammar") as f:
 
 
 # Turn grammar into parser
-parser = Lark(grammar, start=['toplevel', 'program', 'expression'])
+parser = Lark(grammar, start=['toplevel', 'program', 'expression'], maybe_placeholders=False)
 reconstructor = Reconstructor(parser)
