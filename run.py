@@ -1,4 +1,8 @@
 import logging
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str((Path(__file__).parent / 'src').resolve()))
 
 from rollbot.bot import bot
 from rollbot.config import Config
