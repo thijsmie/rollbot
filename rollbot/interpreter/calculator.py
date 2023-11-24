@@ -87,7 +87,7 @@ class AnnotatedCalculateTree(Interpreter):
     def kroll(self, one: str):
         a, b, c = map(int, re.split('k|d', one))
 
-        if c >= a:
+        if c > a:
             raise EvaluationError("Can't drop more than keeping.")
 
         self.count_complexity(
