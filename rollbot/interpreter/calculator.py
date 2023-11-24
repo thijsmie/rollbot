@@ -3,6 +3,7 @@ from random import SystemRandom
 from functools import wraps
 from math import factorial
 from datetime import datetime, timedelta
+import re
 
 from lark import Tree, Token
 from lark.visitors import Interpreter, Transformer
@@ -84,8 +85,8 @@ class AnnotatedCalculateTree(Interpreter):
 
     @visit_children_decor
     def kroll(self, one: str):
-        a, cc = map(int, one.split('d'))
-        b, c = map(int, cc.split('k'))
+        a, b, c = map(int, re.split('k|d', one))
+
         if c >= a:
             raise EvaluationError("Can't drop more than keeping.")
 
