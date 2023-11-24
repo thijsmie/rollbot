@@ -7,8 +7,8 @@ from .varenv import var_env_provider
 
 
 class Config:
-    def __init__(self, config):
-        if type(config) is str:
+    def __init__(self, config: str | dict[str, str]):
+        if isinstance(config, str):
             with open(config) as f:
                 config = json.load(f)
 

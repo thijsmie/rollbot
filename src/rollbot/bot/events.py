@@ -1,4 +1,3 @@
-from ast import expr_context
 import textwrap
 import logging
 
@@ -105,7 +104,6 @@ async def on_message(message):
     if message.guild is None:
         return
 
-
     UPDATE_LVL = 1
     env = var_env_provider.get("__internal__")
     update_level = int(env.get(f"GuildULVL[{message.guild.id}]") or "0")
@@ -124,6 +122,6 @@ async def on_message(message):
             )
             env.set(f"GuildULVL[{message.guild.id}]", str(UPDATE_LVL))
             var_env_provider.update(env)
-    except:
+    except:  # noqa: E722
         # We don't care if message.content is gone now
         pass

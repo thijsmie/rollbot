@@ -28,9 +28,10 @@ def one(*args):
 
 
 def flatten(a):
-    if type(a) == list:
+    if isinstance(a, list):
         return sum((flatten(b) for b in a), [])
     return [a]
+
 
 random = SystemRandom()
 funcs = {"max": max, "min": min, "fac": factorial, "comb": comb, "any": numerical_any}
@@ -50,6 +51,7 @@ def visit_children_decor(func: _InterMethod) -> _InterMethod:
     def inner(cls, tree):
         values = cls.visit_children(tree)
         return func(cls, *values)
+
     return inner
 
 
@@ -70,8 +72,10 @@ class AnnotatedCalculateTree(Interpreter):
 
     @visit_children_decor
     def roll(self, one: str):
-        a,b = map(int, one.split('d'))
-        self.count_complexity(AnnotatedCalculateTree.single_roll_complexity * a * (b // 20 + 1))
+        a, b = map(int, one.split("d"))
+        self.count_complexity(
+            AnnotatedCalculateTree.single_roll_complexity * a * (b // 20 + 1)
+        )
         r = tuple(random.randint(1, b) for _ in range(a))
         rt = tuple(str(v) for v in r)
         return sum(r), f"{one}{{{','.join(rt)}}}"
@@ -79,13 +83,15 @@ class AnnotatedCalculateTree(Interpreter):
     @visit_children_decor
     def sroll(self, one: str):
         b = int(one[1:])
-        self.count_complexity(AnnotatedCalculateTree.single_roll_complexity * (b // 20 + 1))
+        self.count_complexity(
+            AnnotatedCalculateTree.single_roll_complexity * (b // 20 + 1)
+        )
         r = random.randint(1, b)
         return r, f"{one}{{{r}}}"
 
     @visit_children_decor
     def kroll(self, one: str):
-        a, b, c = map(int, re.split('k|d', one))
+        a, b, c = map(int, re.split("k|d", one))
 
         if c > a:
             raise EvaluationError("Can't drop more than keeping.")
@@ -193,9 +199,9 @@ class AnnotatedCalculateTree(Interpreter):
             raise EvaluationError(f"Undefined variable '{name}'.")
         try:
             return int(data), f"_{name}_{{{data}}}"
-        except:
+        except ValueError:
             self.count_complexity(100)
-            tree = parser.parse(data, start='program')
+            tree = parser.parse(data, start="program")
             calculator = AnnotatedCalculateTree(self._env, self._depth + 1)
             val, desc = calculator.visit(tree)
             self.count_complexity(calculator._complexity_counter)
@@ -231,7 +237,9 @@ class AnnotatedCalculateTree(Interpreter):
         self.count_complexity(5)
         self._env.set(name.value, str(expression[0]))
         if len(expression[1]) > 500:
-            return expression[0], f"{name.value} = [too long to render] › **{expression[0]}**"
+            return expression[
+                0
+            ], f"{name.value} = [too long to render] › **{expression[0]}**"
         return f"{name.value} = {{{expression[1]}}} › **{expression[0]}**"
 
     @visit_children_decor
@@ -253,7 +261,9 @@ class AnnotatedCalculateTree(Interpreter):
     def p_func(self, statement: str, expression: Tuple[int, str]):
         self.count_complexity(1)
         if len(expression[1]) > 500:
-            return expression[0], f"{statement}; [too long to render] › **{expression[0]}**"
+            return expression[
+                0
+            ], f"{statement}; [too long to render] › **{expression[0]}**"
         return expression[0], f"{statement}; {expression[1]} › **{expression[0]}**"
 
     @visit_children_decor
@@ -263,10 +273,9 @@ class AnnotatedCalculateTree(Interpreter):
 
 
 def evaluate(text: str, env: VarEnv = None):
-    env = env or VarEnv('test')
-    tree = parser.parse(text, start='toplevel')
+    env = env or VarEnv("test")
+    tree = parser.parse(text, start="toplevel")
     return AnnotatedCalculateTree(env).visit(tree)
-
 
 
 class MinMaxTree(Interpreter):
@@ -277,7 +286,7 @@ class MinMaxTree(Interpreter):
 
     @visit_children_decor
     def roll(self, one: str):
-        a, b = one.split('d')
+        a, b = one.split("d")
         return int(a), int(a) * int(b)
 
     @visit_children_decor
@@ -286,8 +295,8 @@ class MinMaxTree(Interpreter):
 
     @visit_children_decor
     def kroll(self, one: str):
-        a, cc = one.split('d')
-        b, c = cc.split('k')
+        a, cc = one.split("d")
+        b, c = cc.split("k")
         return int(c), int(c) * int(b)
 
     @visit_children_decor
@@ -357,8 +366,8 @@ class MinMaxTree(Interpreter):
 
         try:
             return int(data), int(data)
-        except:
-            tree = parser.parse(data, start='program')
+        except ValueError:
+            tree = parser.parse(data, start="program")
             return MinMaxTree(self._env, self._depth + 1).transform(tree)
 
 
@@ -369,16 +378,16 @@ class FastPreProc(Transformer):
         super().__init__()
 
     def roll(self, one: str):
-        a,b = one[0].split('d')
-        return Tree('roll', (int(a), int(b)))
+        a, b = one[0].split("d")
+        return Tree("roll", (int(a), int(b)))
 
     def sroll(self, one: str):
-        return Tree('sroll', (int(one[0][1:]),))
+        return Tree("sroll", (int(one[0][1:]),))
 
     def kroll(self, one: str):
-        a, cc = one[0].split('d')
-        b, c = cc.split('k')
-        return Tree('roll', (int(c), int(b)))
+        a, cc = one[0].split("d")
+        b, c = cc.split("k")
+        return Tree("roll", (int(c), int(b)))
 
     def var(self, tree):
         data = self._env.get(tree[0])
@@ -387,10 +396,9 @@ class FastPreProc(Transformer):
 
         try:
             return int(data)
-        except:
-            tree = parser.parse(data, start='program')
+        except ValueError:
+            tree = parser.parse(data, start="program")
             return FastPreProc(self._env, self._depth + 1).transform(tree)
-
 
 
 class FastCalculateTree(Interpreter):
@@ -453,11 +461,12 @@ class FastCalculateTree(Interpreter):
         return funcs.get(name, one)(*(a for a in flatten(args)))
 
 
-
-def distribute(text: str, timeout: timedelta = None, env: VarEnv = None, num_bins: int = 1000):
-    env = env or VarEnv('test')
+def distribute(
+    text: str, timeout: timedelta = None, env: VarEnv = None, num_bins: int = 1000
+):
+    env = env or VarEnv("test")
     timeout = timeout or timedelta(seconds=1)
-    tree = parser.parse(text, start='expression')
+    tree = parser.parse(text, start="expression")
     minv, maxv = MinMaxTree(env).visit(tree)
     tree = FastPreProc(env).transform(tree)
 
@@ -475,7 +484,7 @@ def distribute(text: str, timeout: timedelta = None, env: VarEnv = None, num_bin
 
     binw = (maxv - minv) / (num_bins - 1)
 
-    xbin = [minv + binw * i for i in range(num_bins+1)]
+    xbin = [minv + binw * i for i in range(num_bins + 1)]
     bins = [0] * num_bins
 
     end = datetime.now() + timeout
@@ -487,4 +496,3 @@ def distribute(text: str, timeout: timedelta = None, env: VarEnv = None, num_bin
         bins[int((v - minv) / binw)] += 1
 
     return xbin, bins, t
-

@@ -49,7 +49,8 @@ async def distribution(context: Context, roll: str):
         return
     except BakingError as e:
         result = e.args[0]
-    except:
+    except Exception as e:
+        logging.exception(e)
         result = "Server error"
 
     try:
@@ -61,4 +62,4 @@ async def distribution(context: Context, roll: str):
 
 async def varlist(context: Context):
     env = get_var_env(context)
-    await context.respond("\n".join(f"{k} = {v}" for k,v in env.items.items()))
+    await context.respond("\n".join(f"{k} = {v}" for k, v in env.items.items()))

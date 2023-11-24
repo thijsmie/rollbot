@@ -1,4 +1,3 @@
-
 helptext = """
     Rollbot implements the /roll, /distribution and /list command.
     Please go to [tmiedema.com/rollbot](https://tmiedema.com/rollbot) to learn more

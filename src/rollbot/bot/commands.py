@@ -1,13 +1,13 @@
 import logging
+from discord.ext.commands import Context
 
-from .main import bot, Context
+from .main import bot
 from . import text
 from . import handlers
 
 
 def log_action(action, context: Context, data=""):
     logging.info(f"Doing {action} for user {context.author.name} {data}")
-
 
 
 @bot.slash_command(name="help")

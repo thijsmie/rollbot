@@ -9,7 +9,7 @@ class VarEnv:
         self.items = items or {}
 
     def set(self, key: str, value: str) -> None:
-        if type(key) != str:
+        if not isinstance(key, str):
             raise Exception("ENV SET WITH KEY NONSTR")
 
         self.items[key] = value

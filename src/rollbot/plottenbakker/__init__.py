@@ -1,4 +1,2 @@
-
 class BakingError(Exception):
     pass
-

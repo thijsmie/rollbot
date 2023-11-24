@@ -4,6 +4,9 @@ version = "1.0.0"
 description = "Rollbot is a Discord bot for rolling dice."
 authors = ["Thijs Miedema <mail@tmiedema.com>"]
 license = "MIT"
+packages = [
+    {include="rollbot", from="src"}
+]
 
 [tool.poetry.dependencies]
 python = "==3.11.2"
@@ -13,8 +16,8 @@ matplotlib = "^3.5.1"
 lark = "*"
 redis = "^5"
 
-[tool.poetry.dev-dependencies]
-black = "^23"
+[tool.poetry.group.dev.dependencies]
+ruff = "^0.1.6"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
