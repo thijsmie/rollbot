@@ -12,15 +12,15 @@ The same principle applies for `redis_url` and `redis_url_env_var`. Note that if
 
 ## Running Locally
 
-Make sure you have Python 3.10 installed locally, for example using [pyenv](https://github.com/pyenv/pyenv-installer) (be sure to check the [Common build problems](https://github.com/pyenv/pyenv/wiki/common-build-problems) page if you run into any issues). To push to Heroku, you'll need to install the [Heroku CLI](https://devcenter.heroku.com/articles/heroku-cli). Additionally, to make user variable environments you'll need to setup redis. I suggest you don't bother with this for your local testing setup. To manage the dependencies I use [poetry](https://python-poetry.org/).
+Make sure you have Python 3.11 installed locally, for example using [pyenv](https://github.com/pyenv/pyenv-installer) (be sure to check the [Common build problems](https://github.com/pyenv/pyenv/wiki/common-build-problems) page if you run into any issues). To push to Heroku, you'll need to install the [Heroku CLI](https://devcenter.heroku.com/articles/heroku-cli). Additionally, to make user variable environments you'll need to setup redis. I suggest you don't bother with this for your local testing setup. To manage the dependencies I use [poetry](https://python-poetry.org/).
 
 ```sh
 $ git clone https://github.com/thijsmie/rollbot.git
 $ cd rollbot
 
 # pyenv installing python
-$ pyenv install 3.10.2
-$ pyenv shell 3.10.2
+$ pyenv install 3.11.6
+$ pyenv shell 3.11.6
 
 # installing dependencies
 $ pip install poetry
