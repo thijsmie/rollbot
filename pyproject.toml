@@ -9,12 +9,11 @@ packages = [
 ]
 
 [tool.poetry.dependencies]
-python = "==3.11.6"
-py-cord = {extras = ["speed"], version="*"}
-numpy = "^1.22.1"
-matplotlib = "^3.5.1"
-lark = "*"
-redis = "^5"
+python = "~3.11"
+py-cord = {extras = ["speed"], version="^2"}
+numpy = "^1"
+matplotlib = "^3"
+lark = "^1"
 
 [tool.poetry.group.dev.dependencies]
 ruff = "^0.1.6"

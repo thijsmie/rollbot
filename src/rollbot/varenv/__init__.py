@@ -1,9 +1,8 @@
-from typing import Optional, Dict, Any
-import json
+from rollbot.db import SQLiteDB
 
 
 class VarEnv:
-    def __init__(self, name: str, items: Dict[str, str] = None):
+    def __init__(self, name: str, items: dict[str, str] = None) -> None:
         self.dirty = False
         self.name = name
         self.items = items or {}
@@ -15,13 +14,13 @@ class VarEnv:
         self.items[key] = value
         self.dirty = True
 
-    def get(self, key: str) -> Optional[str]:
+    def get(self, key: str) -> str | None:
         return self.items.get(key)
 
 
 class VarEnvProvider:
     def __init__(self):
-        self.db: Any = None
+        self.db: SQLiteDB | None = None
 
     def set_db(self, db):
         self.db = db
@@ -29,14 +28,14 @@ class VarEnvProvider:
     def get(self, name: str) -> VarEnv:
         if not self.db:
             return VarEnv(name)
-        data = self.db.get(f"VarEnv[{name}]")
+        data = self.db.get(name)
         if not data:
             return VarEnv(name)
-        return VarEnv(name, json.loads(data))
+        return VarEnv(name, data)
 
-    def update(self, varenv: VarEnv):
+    def update(self, varenv: VarEnv) -> None:
         if varenv.dirty and self.db is not None:
-            self.db.set(f"VarEnv[{varenv.name}]", json.dumps(varenv.items))
+            self.db.set(varenv.name, varenv.items)
 
 
 var_env_provider = VarEnvProvider()
