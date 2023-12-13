@@ -16,8 +16,6 @@ def get_var_env(context: Context) -> VarEnv:
 async def roll(context: Context, roll: str):
     env = get_var_env(context)
 
-    await context.defer()
-
     try:
         result = evaluate(roll, env)
         var_env_provider.update(env)
@@ -38,8 +36,6 @@ async def roll(context: Context, roll: str):
 
 async def distribution(context: Context, roll: str):
     env = get_var_env(context)
-
-    await context.defer()
 
     try:
         png = await bake_distribution(roll, env)

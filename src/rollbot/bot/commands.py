@@ -20,6 +20,7 @@ async def implement_help(context: Context):
 @bot.slash_command(name="roll")
 async def implement_roll(context: Context, roll: str):
     """Roll some dice, like 'd8+3' or 'max(d20, d20) + 8'."""
+    await context.defer()
     log_action("roll", context, f"roll: {roll}")
     await handlers.roll(context, roll)
 
@@ -27,6 +28,7 @@ async def implement_roll(context: Context, roll: str):
 @bot.slash_command(name="distribution")
 async def implement_distribution(context: Context, roll: str):
     """Plot the distribution of a diceroll."""
+    await context.defer()
     log_action("distribution", context, f"roll: {roll}")
     await handlers.distribution(context, roll)
 
