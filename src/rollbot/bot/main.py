@@ -1,4 +1,6 @@
 import discord
 
 
-bot = discord.AutoShardedBot()
+intents = discord.Intents.default() 
+bot = discord.AutoShardedClient(intents=intents)
+tree = discord.app_commands.CommandTree(bot)

@@ -10,10 +10,10 @@ packages = [
 
 [tool.poetry.dependencies]
 python = "~3.11"
-py-cord = {extras = ["speed"], version="^2"}
 numpy = "^1"
 matplotlib = "^3"
 lark = "^1"
+discord-py = "^2.3.2"
 
 [tool.poetry.group.dev.dependencies]
 ruff = "^0.1.6"

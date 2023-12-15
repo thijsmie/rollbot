@@ -2,13 +2,13 @@ import textwrap
 import logging
 
 import discord
-from .main import bot
+from .main import bot, tree
 from . import text
-from rollbot.varenv import var_env_provider
 
 
 @bot.event
 async def on_ready():
+    await tree.sync()
     names = ";; ".join(str(g.name) for g in bot.guilds)
     txt = "\n".join(textwrap.wrap(names, width=120))
 
@@ -45,7 +45,7 @@ async def hello_server(channel):
 
 
 @bot.event
-async def on_guild_join(guild):
+async def on_guild_join(guild: discord.Guild):
     # The bot has joined a new server, lets let them know what this bot can do
     logging.warning(f"Joined new server '{guild.name}'")
 
@@ -71,4 +71,3 @@ async def on_guild_join(guild):
         if await hello_server(channel):
             return
     logging.error("Could not say hello to {} sadly... :(".format(guild.name))
-

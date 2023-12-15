@@ -3,17 +3,17 @@ import secrets
 import logging
 from lark.exceptions import UnexpectedInput
 
-from discord.ext.commands import Context
+from discord import Interaction
 from rollbot.varenv import VarEnv, var_env_provider
 from rollbot.interpreter.calculator import evaluate, EvaluationError
 from rollbot.plottenbakker.asyncing import bake_distribution, BakingError
 
 
-def get_var_env(context: Context) -> VarEnv:
-    return var_env_provider.get(str(context.author.id))
+def get_var_env(context: Interaction) -> VarEnv:
+    return var_env_provider.get(str(context.user.id))
 
 
-async def roll(context: Context, roll: str):
+async def roll(context: Interaction, roll: str):
     env = get_var_env(context)
 
     try:
@@ -28,18 +28,18 @@ async def roll(context: Context, roll: str):
         result = "Server error"
 
     try:
-        await context.respond(result)
+        await context.followup.send(result)
     except Exception as e:
         logging.exception(e)
-        await context.respond("Could not deliver result")
+        await context.followup.send("Could not deliver result")
 
 
-async def distribution(context: Context, roll: str):
+async def distribution(context: Interaction, roll: str):
     env = get_var_env(context)
 
     try:
         png = await bake_distribution(roll, env)
-        await context.respond(
+        await context.followup.send(
             file=discord.File(png, filename=f"{secrets.token_urlsafe(8)}.png")
         )
         return
@@ -50,12 +50,12 @@ async def distribution(context: Context, roll: str):
         result = "Server error"
 
     try:
-        await context.respond(result)
+        await context.followup.send(result)
     except Exception as e:
         logging.exception(e)
-        await context.respond("Could not deliver result")
+        await context.followup.send("Could not deliver result")
 
 
-async def varlist(context: Context):
+async def varlist(context: Interaction):
     env = get_var_env(context)
-    await context.respond("\n".join(f"{k} = {v}" for k, v in env.items.items()))
+    await context.followup.send("\n".join(f"{k} = {v}" for k, v in env.items.items()))
