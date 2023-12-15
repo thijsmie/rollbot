@@ -11,14 +11,14 @@ if __name__ == "__main__":
 
     try:
         env = VarEnv(varenv_name)
-    except:
-        print("No such environment")
+    except Exception as e:
+        print(f"No such environment {e}")
         sys.exit(1)
 
     try:
         data = distribute(expression, timedelta(seconds=5), env)
         if not data:
-            print(f"Unprocessable input")
+            print("Unprocessable input")
             sys.exit(1)
         xbins, data, num_rolls = data
     except EvaluationError as e:
@@ -27,7 +27,7 @@ if __name__ == "__main__":
     except UnexpectedInput as e:
         print(f"Unexpected input: ```\n{e.get_context(expression)}```")
         sys.exit(1)
-    except:
+    except Exception:
         print("Server error")
         sys.exit(1)
 
