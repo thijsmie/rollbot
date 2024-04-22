@@ -26,6 +26,5 @@ COPY src/rollbot /app/rollbot
 RUN chown -R rollbot:rollbot /app
 
 USER rollbot
-WORKDIR /app/rollbot
 
 ENTRYPOINT ["python", "-m", "rollbot"]
