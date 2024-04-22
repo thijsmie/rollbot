@@ -1,4 +1,4 @@
-FROM python:3.11-bookworm as builder
+FROM python:3.12 as builder
 
 RUN pip install poetry==1.7.1
 
@@ -14,15 +14,18 @@ RUN touch README.md
 
 RUN --mount=type=cache,target=$POETRY_CACHE_DIR poetry install --without dev --no-root
 
-FROM python:3.11-slim-bookworm as runtime
+FROM python:3.12-slim as runtime
 
 ENV VIRTUAL_ENV=/app/.venv \
     PATH="/app/.venv/bin:$PATH"
 
-RUN mkdir /data
+RUN useradd rollbot && mkdir /app
 
 COPY --from=builder ${VIRTUAL_ENV} ${VIRTUAL_ENV}
+COPY src/rollbot /app/rollbot
+RUN chown -R rollbot:rollbot /app
 
-COPY src/rollbot ./rollbot
+USER rollbot
+WORKDIR /app/rollbot
 
 ENTRYPOINT ["python", "-m", "rollbot"]

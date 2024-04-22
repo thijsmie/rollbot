@@ -1,17 +1,20 @@
 import logging
-import os
+import dotenv
 
 from rollbot.bot import bot
 from rollbot.db import SQLiteDB
 from rollbot.varenv import var_env_provider
 
 
+config = dotenv.dotenv_values("/etc/data/env")
+
+
 logging.basicConfig(
     level=logging.INFO,
     format="[%(levelname)s] %(asctime)s - %(message)s",
 )
-token = os.environ["DISCORD_TOKEN"]
-db = SQLiteDB(os.environ["SQLITE_PATH"])
+token = config["DISCORD_TOKEN"]
+db = SQLiteDB(config["SQLITE_PATH"])
 var_env_provider.set_db(db)
 
 bot.run(token)
