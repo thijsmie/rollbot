@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "rollbot"
-version = "1.0.0"
+version = "1.0.1"
 description = "Rollbot is a Discord bot for rolling dice."
 authors = ["Thijs Miedema <mail@tmiedema.com>"]
 license = "MIT"
@@ -9,11 +9,13 @@ packages = [
 ]
 
 [tool.poetry.dependencies]
-python = "~3.11"
+python = "~3.12"
 numpy = "^1"
 matplotlib = "^3"
 lark = "^1"
 discord-py = "^2.3.2"
+setuptools = "^69.5.1"
+python-dotenv = "^1.0.1"
 
 [tool.poetry.group.dev.dependencies]
 ruff = "^0.1.6"
