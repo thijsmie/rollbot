@@ -12,12 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-name: Build and Deploy to Google Compute Engine
+name: Deployment
 
-on:
-  push:
-    branches:
-      - cloud-run
+concurrency:
+  group: production
+  cancel-in-progress: true
+
+on: workflow_dispatch
 
 env:
   PROJECT_ID: ${{ secrets.GCE_PROJECT }}
