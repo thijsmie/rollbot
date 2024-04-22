@@ -44,13 +44,13 @@ jobs:
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v1
       - run: |-
-          gcloud --quiet auth configure-docker
+          gcloud --quiet auth configure-docker us-central1-docker.pkg.dev
       - name: Build
         run: |-
-          docker build --tag "gcr.io/$PROJECT_ID/$GCE_INSTANCE-image:$GITHUB_SHA" .
+          docker build --tag "us-central1-docker.pkg.dev/$PROJECT_ID/rollbot-vm/$GCE_INSTANCE-image:$GITHUB_SHA" .
       - name: Publish
         run: |-
-          docker push "gcr.io/$PROJECT_ID/$GCE_INSTANCE-image:$GITHUB_SHA"
+          docker push "us-central1-docker.pkg.dev/$PROJECT_ID/rollbot-vm/$GCE_INSTANCE-image:$GITHUB_SHA"
       - name: Update startup script to prune and update IP address
         run: |-
           gcloud compute instances add-metadata $GCE_INSTANCE \
@@ -61,10 +61,4 @@ jobs:
         run: |-
           gcloud compute instances update-container "$GCE_INSTANCE" \
             --zone "$GCE_INSTANCE_ZONE" \
-            --container-image "gcr.io/$PROJECT_ID/$GCE_INSTANCE-image:$GITHUB_SHA"
-      - name: Purge GCR images
-        run: |-
-          gcloud container images list-tags gcr.io/$PROJECT_ID/$GCE_INSTANCE-image \
-            --format="get(digest)" --filter="NOT tags=$GITHUB_SHA" | \
-            awk -v image_path="gcr.io/$PROJECT_ID/$GCE_INSTANCE-image@" '{print image_path $1}' | \
-            xargs -r gcloud container images delete --force-delete-tags --quiet
+            --container-image "us-central1-docker.pkg.dev/$PROJECT_ID/rollbot-vm/$GCE_INSTANCE-image:$GITHUB_SHA"
