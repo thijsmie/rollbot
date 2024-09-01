@@ -13,8 +13,8 @@ def log_action(action, context: Interaction, data=""):
 
 @tree.command(name="help", description="Show a help message")
 async def implement_help(context: Interaction):
-    await context.response.send_message(text.helptext)
     log_action("help", context)
+    await context.response.send_message(text.helptext)
 
 
 @tree.command(
@@ -22,19 +22,19 @@ async def implement_help(context: Interaction):
 )
 async def implement_roll(context: Interaction, roll: str):
     await context.response.defer(thinking=True)
-    await handlers.roll(context, roll)
     log_action("roll", context, f"roll: {roll}")
+    await handlers.roll(context, roll)
 
 
 @tree.command(name="distribution", description="Plot the distribution of a diceroll.")
 async def implement_distribution(context: Interaction, roll: str):
     await context.response.defer(thinking=True)
-    await handlers.distribution(context, roll)
     log_action("distribution", context, f"roll: {roll}")
+    await handlers.distribution(context, roll)
 
 
 @tree.command(name="list", description="List your macros.")
 async def implement_varlist(context: Interaction):
     await context.response.defer(thinking=True)
-    await handlers.varlist(context)
     log_action("list", context)
+    await handlers.varlist(context)

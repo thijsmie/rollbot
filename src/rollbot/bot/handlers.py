@@ -58,4 +58,10 @@ async def distribution(context: Interaction, roll: str):
 
 async def varlist(context: Interaction):
     env = get_var_env(context)
-    await context.followup.send("\n".join(f"{k} = {v}" for k, v in env.items.items()))
+    items = env.items
+    if not items:
+        await context.followup.send("No macros defined")
+    else:
+        await context.followup.send(
+            "\n".join(f"{k} = {v}" for k, v in env.items.items())
+        )
