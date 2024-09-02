@@ -6,7 +6,7 @@ from rollbot.db import SQLiteDB
 from rollbot.varenv import var_env_provider
 
 
-config = dotenv.dotenv_values("/etc/data/env")
+config = dotenv.dotenv_values("env")
 
 
 logging.basicConfig(
