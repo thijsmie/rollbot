@@ -4,7 +4,6 @@ import re
 from collections.abc import Callable
 from datetime import datetime, timedelta
 from functools import wraps
-from math import factorial
 from random import SystemRandom
 from typing import TypeVar
 
@@ -14,22 +13,11 @@ from lark.visitors import Interpreter, Transformer
 
 from rollbot.varenv import VarEnv
 
+from .functions import funcs
 from .parser import parser, reconstructor
 
 random = SystemRandom()
 logger = structlog.get_logger()
-
-
-def comb(n, k, *args):
-    return factorial(n) // factorial(k) // factorial(n - k)
-
-
-def numerical_any(*args):
-    return 1 if any(a > 0 for a in args) else 0
-
-
-def one(*args):
-    return 1
 
 
 def flatten(a):
@@ -39,7 +27,6 @@ def flatten(a):
 
 
 random = SystemRandom()
-funcs = {"max": max, "min": min, "fac": factorial, "comb": comb, "any": numerical_any}
 
 
 class EvaluationError(Exception):
@@ -187,16 +174,19 @@ class AnnotatedCalculateTree(Interpreter):
         return c[0], f"{{{c[1]}}}"
 
     @visit_children_decor
-    def func(self, name: str, args) -> tuple[int, str]:
+    def func(self, name: str, args: list[tuple[int, str]] | None = None) -> tuple[int, str]:
+        if not args:
+            raise EvaluationError(f"Function '{name}' requires arguments")
+
         self.count_complexity(10)
         args = flatten(args)
         self.count_complexity(len(args))
         if name not in funcs:
             raise EvaluationError(f"No such function '{name}'")
 
-        values = (a[0] for a in args)
+        values = [a[0] for a in args]
         descr = ", ".join(a[1] for a in args)
-        return funcs.get(name, one)(*values), f"{name}({descr})"
+        return funcs[name](values), f"{name}({descr})"
 
     @visit_children_decor
     def var(self, name: str) -> tuple[int, str]:
@@ -359,9 +349,9 @@ class MinMaxTree(Interpreter):
 
         # We have a nice selection of functions that are min/max preserving
 
-        minvalues = (a[0] for a in args)
-        maxvalues = (a[1] for a in args)
-        return funcs.get(name, one)(*minvalues), funcs.get(name, one)(*maxvalues)
+        minvalues = [a[0] for a in args]
+        maxvalues = [a[1] for a in args]
+        return funcs[name](minvalues), funcs[name](maxvalues)
 
     @visit_children_decor
     def var(self, name: str):
@@ -465,7 +455,7 @@ class FastCalculateTree(Interpreter):
         if name not in funcs:
             raise EvaluationError(f"No such function '{name}'")
 
-        return funcs.get(name, one)(*(a for a in flatten(args)))
+        return funcs.get[name](*(a for a in flatten(args)))
 
 
 def distribute(text: str, timeout: timedelta | None = None, env: VarEnv = None, num_bins: int = 1000):
