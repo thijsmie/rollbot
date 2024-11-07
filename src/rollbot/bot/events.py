@@ -13,11 +13,7 @@ logger = structlog.get_logger()
 async def on_ready():
     await tree.sync()
 
-    logger.info(
-        "Logged in",
-        bot_name=bot.user.name,
-        bot_id=bot.user.id
-    )
+    logger.info("Logged in", bot_name=bot.user.name, bot_id=bot.user.id)
 
     for batch in itertools.batched(bot.guilds, 50):
         logger.info("Connected to guilds", guilds=[g.name for g in batch])
