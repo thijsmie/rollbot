@@ -1,3 +1,5 @@
+import itertools
+
 import discord
 import structlog
 
@@ -14,9 +16,11 @@ async def on_ready():
     logger.info(
         "Logged in",
         bot_name=bot.user.name,
-        bot_id=bot.user.id,
-        guilds=[g.name for g in bot.guilds],
+        bot_id=bot.user.id
     )
+
+    for batch in itertools.batched(bot.guilds, 50):
+        logger.info("Connected to guilds", guilds=[g.name for g in batch])
 
 
 async def hello_server(channel):
