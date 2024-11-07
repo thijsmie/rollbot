@@ -1,11 +1,18 @@
+import logging
 import sys
 from datetime import timedelta
-from rollbot.interpreter.calculator import distribute, EvaluationError
-from rollbot.varenv import VarEnv
+
+import structlog
 from lark.exceptions import UnexpectedInput
 
+from rollbot.interpreter.calculator import EvaluationError, distribute
+from rollbot.varenv import VarEnv
 
 if __name__ == "__main__":
+    # Disable all logging in distributer process
+    logging.disable(logging.CRITICAL)
+    structlog.configure(logger_factory=lambda: logging.getLogger())
+
     varenv_name = sys.stdin.readline().strip()
     expression = sys.stdin.readline().strip()
 

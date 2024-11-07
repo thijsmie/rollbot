@@ -1,6 +1,9 @@
 # Custom
 config/local.json
 .vscode
+.*_cache
+env
+*.db
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

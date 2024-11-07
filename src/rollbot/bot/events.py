@@ -1,29 +1,21 @@
-import textwrap
-import logging
-
 import discord
-from .main import bot, tree
+import structlog
+
 from . import text
+from .main import bot, tree
+
+logger = structlog.get_logger()
 
 
 @bot.event
 async def on_ready():
     await tree.sync()
-    names = ";; ".join(str(g.name) for g in bot.guilds)
-    txt = "\n".join(textwrap.wrap(names, width=120))
 
-    logging.warning(
-        f"""
---------------------------------------------------
-Logged in as {bot.user.name} - {bot.user.id}
-
-All guilds listed below
---------------------------------------------------
-{txt}
---------------------------------------------------
-That is {len(bot.guilds)} guilds active!
---------------------------------------------------
-    """
+    logger.info(
+        "Logged in",
+        bot_name=bot.user.name,
+        bot_id=bot.user.id,
+        guilds=[g.name for g in bot.guilds],
     )
 
 
@@ -37,7 +29,7 @@ async def hello_server(channel):
                     description=text.welcome_text.strip(),
                 )
             )
-            logging.warning("Said hello to {}!".format(channel.guild.name))
+            logger.info("Said hello", guild=channel.guild.name, channel=channel.name)
             return True
         except Exception:
             return False
@@ -47,7 +39,7 @@ async def hello_server(channel):
 @bot.event
 async def on_guild_join(guild: discord.Guild):
     # The bot has joined a new server, lets let them know what this bot can do
-    logging.warning(f"Joined new server '{guild.name}'")
+    logger.info("Joined new server", guild=guild.name)
 
     try:
         if await hello_server(guild.system_channel):
@@ -70,4 +62,5 @@ async def on_guild_join(guild: discord.Guild):
     for channel in guild.text_channels:
         if await hello_server(channel):
             return
-    logging.error("Could not say hello to {} sadly... :(".format(guild.name))
+
+    logger.error("Could not send welcome message", guild=guild.name)

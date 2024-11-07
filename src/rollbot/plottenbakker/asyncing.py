@@ -1,8 +1,9 @@
-import sys
-import logging
 import asyncio
+import sys
 from io import BytesIO
+
 from rollbot.varenv import VarEnv
+
 from . import BakingError
 from .plotter import plot_distribution
 
@@ -24,8 +25,7 @@ async def bake_distribution(expression: str, env: VarEnv) -> BytesIO:
         xbins = [float(x) for x in pxbins.split(" ")]
         data = [int(x) for x in pdata.split(" ")]
         num_rolls = int(pnumrolls)
-    except Exception as e:
-        logging.exception(e)
+    except Exception:
         raise BakingError("Server Error")
 
     buf = BytesIO()

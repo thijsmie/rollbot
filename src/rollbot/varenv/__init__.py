@@ -2,7 +2,7 @@ from rollbot.db import SQLiteDB
 
 
 class VarEnv:
-    def __init__(self, name: str, items: dict[str, str] = None) -> None:
+    def __init__(self, name: str, items: dict[str, str] | None = None) -> None:
         self.dirty = False
         self.name = name
         self.items = items or {}

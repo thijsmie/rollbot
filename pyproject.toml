@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "rollbot"
-version = "1.0.2"
+version = "2.0.0"
 description = "Rollbot is a Discord bot for rolling dice."
 authors = ["Thijs Miedema <mail@tmiedema.com>"]
 license = "MIT"
@@ -12,14 +12,29 @@ packages = [
 python = "~3.12"
 numpy = "^2"
 matplotlib = "^3"
-lark = "1.1.9"
+lark = "^1.2.2"
 discord-py = "^2.3.2"
-setuptools = "^74.0.0"
+setuptools = "^75.0.0"
 python-dotenv = "^1.0.1"
+structlog = "^24.4.0"
 
 [tool.poetry.group.dev.dependencies]
-ruff = "^0.6"
+ruff = "^0.7"
+pytest = "^8.3.3"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["A", "C", "E", "F", "UP", "RUF", "I", "PL", "PTH", "TID252", "SIM"]
+ignore = ["E402", "PLR2004", "PLR0913", "RUF001"]
+fixable = ["C", "E", "F", "UP", "I", "PL", "RUF", "PTH", "PLC", "TID252", "SIM"]
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+[tool.ruff.lint.mccabe]
+max-complexity = 10

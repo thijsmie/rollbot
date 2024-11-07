@@ -7,6 +7,7 @@
 %ignore WS_INLINE
 
 
+?integer.1: /\d+/
 var.1:  /\w+/
 roll.2: /[0-9]+d[0-9]+/
 sroll.2: /d[0-9]+/
@@ -26,7 +27,7 @@ kroll.3: /[0-9]+d[0-9]+k[0-9]+/
        | product "/" atom  -> div
        | product "%" atom  -> mod
 
-?atom: INT                  -> number
+?atom: integer              -> number
     | "-" atom              -> neg
     | "{" args+ "}"         -> pick
     | NAME "(" args? ")"    -> func

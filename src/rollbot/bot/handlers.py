@@ -1,12 +1,15 @@
-import discord
 import secrets
-import logging
+
+import discord
+import structlog
+from discord import Interaction
 from lark.exceptions import UnexpectedInput
 
-from discord import Interaction
+from rollbot.interpreter.calculator import EvaluationError, evaluate
+from rollbot.plottenbakker.asyncing import BakingError, bake_distribution
 from rollbot.varenv import VarEnv, var_env_provider
-from rollbot.interpreter.calculator import evaluate, EvaluationError
-from rollbot.plottenbakker.asyncing import bake_distribution, BakingError
+
+logger = structlog.get_logger()
 
 
 def get_var_env(context: Interaction) -> VarEnv:
@@ -23,14 +26,14 @@ async def roll(context: Interaction, roll: str):
         result = e.args[0]
     except UnexpectedInput as e:
         result = f"Unexpected input: ```\n{e.get_context(roll)}```"
-    except Exception as e:
-        logging.exception(e)
+    except Exception:
+        logger.exception("Error during roll", roll=roll)
         result = "Server error"
 
     try:
         await context.followup.send(result)
-    except Exception as e:
-        logging.exception(e)
+    except Exception:
+        logger.exception("Error during followup", roll=roll)
         await context.followup.send("Could not deliver result")
 
 
@@ -39,20 +42,18 @@ async def distribution(context: Interaction, roll: str):
 
     try:
         png = await bake_distribution(roll, env)
-        await context.followup.send(
-            file=discord.File(png, filename=f"{secrets.token_urlsafe(8)}.png")
-        )
+        await context.followup.send(file=discord.File(png, filename=f"{secrets.token_urlsafe(8)}.png"))
         return
     except BakingError as e:
         result = e.args[0]
-    except Exception as e:
-        logging.exception(e)
+    except Exception:
+        logger.exception("Error during baking", roll=roll)
         result = "Server error"
 
     try:
         await context.followup.send(result)
-    except Exception as e:
-        logging.exception(e)
+    except Exception:
+        logger.exception("Error during followup", roll=roll)
         await context.followup.send("Could not deliver result")
 
 
@@ -62,6 +63,4 @@ async def varlist(context: Interaction):
     if not items:
         await context.followup.send("No macros defined")
     else:
-        await context.followup.send(
-            "\n".join(f"{k} = {v}" for k, v in env.items.items())
-        )
+        await context.followup.send("\n".join(f"{k} = {v}" for k, v in env.items.items()))
