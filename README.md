@@ -1,48 +1,75 @@
-# Roll-Bot
+# Rollbot 🎲
 
-A tabletop dice rolling bot, which can easily be deployed to Heroku. You can also use the publicly hosted version. Go to [the rollbot website](https://tmiedema.com/rollbot) for more information.
+Welcome to **Rollbot**, your versatile tabletop dice rolling companion for Discord! Whether you're embarking on epic adventures or engaging in strategic battles, Rollbot ensures your dice rolls are seamless and fair.
 
-## Configuration
+Deploy yourself or use the [publicly hosted version](https://discord.com/oauth2/authorize?client_id=712234733542572063&scope=bot&permissions=35840). Go to [the rollbot website](https://tmiedema.com/rollbot) for more information.
 
-The config files contain four possible entries at the moment. By default local running will use the `config/local.json` file and production will use `config/production.json`. Two example json files are provided which you can rename. The local config is gitignored to avoid exposing your testing discord bot token. It is recommended you use [Heroku environment variables](https://devcenter.heroku.com/articles/config-vars) for production configuration.
+## Features ✨
 
-Entries `discord_token` or `discord_token_env_var` are used to set your discord bot token. If the first one is set the second one is ignored. The first one is used to directly set the token, while the second one can be used to set the name of an environment variable that holds the token.
+- **Flexible dice rolling:** Supports standard and custom dice notations, including complex expressions like `d8+3` or `max(d20, d20) + 8`.
+- **Probability distributions:** Visualize roll distributions to understand outcome probabilities.
+- **User-friendly commands:** Intuitive slash commands for effortless interaction.
+- **Macro management:** Create and manage roll macros for quick access to frequently used rolls.
 
-The same principle applies for `redis_url` and `redis_url_env_var`. Note that if neither is set the app will still run without variable environment saving.
+## Usage 📖
 
-## Running Locally
+Once RollBot is running, use the following commands in your Discord server:
 
-Make sure you have Python 3.11 installed locally, for example using [pyenv](https://github.com/pyenv/pyenv-installer) (be sure to check the [Common build problems](https://github.com/pyenv/pyenv/wiki/common-build-problems) page if you run into any issues). To push to Heroku, you'll need to install the [Heroku CLI](https://devcenter.heroku.com/articles/heroku-cli). Additionally, to make user variable environments you'll need to setup redis. I suggest you don't bother with this for your local testing setup. To manage the dependencies I use [poetry](https://python-poetry.org/).
+- `/roll [expression]`: Rolls dice based on the provided expression.
+- `/distribution [expression]`: Displays the probability distribution for the given roll expression.
+- `/list`: Lists your saved roll macros.
 
-```sh
-$ git clone https://github.com/thijsmie/rollbot.git
-$ cd rollbot
+### Examples of Roll Expressions
 
-# pyenv installing python
-$ pyenv install 3.11.6
-$ pyenv shell 3.11.6
+- **Basic Rolls:**
+  - `d20`: Roll a 20-sided die.
+  - `8d8`: Roll eight 8-sided dice.
 
-# installing dependencies
-$ pip install poetry
-$ poetry install
+- **Keep Highest Rolls:**
+  - `3d20k2`: Roll three 20-sided dice and keep the highest two.
+  - `4d6k3`: Roll four 6-sided dice and keep the highest three.
 
-# running the app
-$ poetry shell
-$ python runlocal.py
-```
+- **Math Operations:**
+  - `d20 + 5`: Roll a 20-sided die and add 5.
+  - `2d10 - 3`: Roll two 10-sided dice and subtract 3.
 
-Your app should now be running and announce its discord username.
+- **Logical Operations:**
+  - `d20 > 15`: Roll a 20-sided die and check if the result is greater than 15.
+  - `2d6 == 7`: Roll two 6-sided dice and check if the sum equals 7.
 
-## Deploying to Heroku
+- **Functions:**
+  - `max(d20, d12)`: Roll a 20-sided die and a 12-sided die, and take the maximum.
+  - `min(d10, d8)`: Roll a 10-sided die and an 8-sided die, and take the minimum.
+  - `fac(5)`: Compute the factorial of 5.
+  - `comb(5, 2)`: Compute the combination of 5 choose 2.
+  - `any(d6-3, d6-3, d6-3)`: Roll three 6-sided dice and return 1 if any result is greater than 0.
 
-First create a new app on heroku, using free dynos is fine. Provision the [RedisCloud](https://elements.heroku.com/addons/rediscloud) addon, again, free tier is fine. Now set an environment variable DISCORD_TOKEN with your discord bot token and copy `production.example.json` to `production.json`.
+- **Assignments:**
+  - `a = 2d20`: Assign the result of rolling two 20-sided dice to variable `a`.
+  - `b = d8 + 3`: Assign the result of rolling an 8-sided die plus 3 to variable `b`.
+  - `a &= 2d20`: Compute the result of rolling two 20-sided dice and assign it to variable `a`.
 
-Then in the terminal run the following commands.
+- **Multi-Rolls:**
+  - `d20; d20 + 7`: Roll a 20-sided die, then roll another 20-sided die and add 7.
+  - `reroll_1s_d6 = (d6; a &= (a == 1) * d6 + (a > 1) * a; a)`: Roll a 6-sided die, and if the result is 1, reroll it.
 
-```sh
-$ heroku git:remote -a HerokuAppName
-$ git push heroku master
-```
+- **Comments:**
+  - `"This is a roll:" d20; "And another one" d100 + 20`: Add comments to your roll expressions.
 
-Your app should now be live.
+## Contributing 🤝
 
+We welcome contributions! To get started:
+
+1. Fork the repository.
+2. Create a new branch: `git checkout -b feature/YourFeature`
+3. Commit your changes: `git commit -m 'Add YourFeature'`
+4. Push to the branch: `git push origin feature/YourFeature`
+5. Open a pull request.
+
+## License 📄
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+
+## Acknowledgements 🙏
+
+Special thanks to all contributors and the open-source community for their invaluable support.

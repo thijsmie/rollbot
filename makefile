@@ -1,7 +1,7 @@
 all: lint format test
 
 lint:
-	poetry run ruff check --fix src
+	poetry run ruff check --fix src tests
 
 format:
 	poetry run ruff format src tests

@@ -65,6 +65,10 @@ class AnnotatedCalculateTree(Interpreter):
     @visit_children_decor
     def roll(self, one: str) -> tuple[int, str]:
         a, b = map(int, one.split("d"))
+
+        if b == 0:
+            raise EvaluationError("Can't roll a zero-sided die.")
+
         self.count_complexity(AnnotatedCalculateTree.single_roll_complexity * a * int(b // 20 + 1))
         r = tuple(random.randint(1, b) for _ in range(a))
         rt = tuple(str(v) for v in r)
@@ -76,6 +80,10 @@ class AnnotatedCalculateTree(Interpreter):
     @visit_children_decor
     def sroll(self, one: str) -> tuple[int, str]:
         b = int(one[1:])
+
+        if b == 0:
+            raise EvaluationError("Can't roll a zero-sided die.")
+
         self.count_complexity(AnnotatedCalculateTree.single_roll_complexity * int(b // 20 + 1))
         res = random.randint(1, b)
         desc = f"{one}{{{res}}}"
@@ -85,6 +93,9 @@ class AnnotatedCalculateTree(Interpreter):
     @visit_children_decor
     def kroll(self, one: str) -> tuple[int, str]:
         a, b, c = map(int, re.split("k|d", one))
+
+        if b == 0:
+            raise EvaluationError("Can't roll a zero-sided die.")
 
         if c > a:
             raise EvaluationError("Can't drop more than keeping.")

@@ -1,6 +1,7 @@
-from rollbot.interpreter.calculator import evaluate, distribute
-from datetime import timedelta
 import re
+from datetime import timedelta
+
+from rollbot.interpreter.calculator import distribute, evaluate
 
 
 def test_evaluate_basic():

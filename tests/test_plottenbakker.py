@@ -1,6 +1,7 @@
+import asyncio
+
 from rollbot.plottenbakker.asyncing import bake_distribution
 from rollbot.varenv import VarEnv
-import asyncio
 
 
 def test_bake_distribution():

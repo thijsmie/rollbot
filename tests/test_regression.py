@@ -1,5 +1,6 @@
-from rollbot.interpreter.calculator import evaluate, EvaluationError
 import pytest
+
+from rollbot.interpreter.calculator import EvaluationError, evaluate
 
 
 def test_func_arity():
@@ -15,3 +16,14 @@ def test_func_arity():
 
     with pytest.raises(EvaluationError):
         evaluate("nosuchfun(1)")
+
+
+def test_zero_sided_die():
+    with pytest.raises(EvaluationError):
+        evaluate("d0")
+
+    with pytest.raises(EvaluationError):
+        evaluate("1d0")
+
+    with pytest.raises(EvaluationError):
+        evaluate("2d0k1")
