@@ -5,7 +5,7 @@ from io import BytesIO
 from rollbot.varenv import VarEnv
 
 from . import BakingError
-from .plotter import plot_distribution
+from .plotter import plot_distribution, plot_statistics
 
 
 async def bake_distribution(expression: str, env: VarEnv) -> BytesIO:
@@ -30,5 +30,12 @@ async def bake_distribution(expression: str, env: VarEnv) -> BytesIO:
 
     buf = BytesIO()
     plot_distribution(buf, expression, xbins, data, num_rolls)
+    buf.seek(0)
+    return buf
+
+
+async def bake_statistics(description: str, stats: dict[int, int], die: int) -> BytesIO:
+    buf = BytesIO()
+    plot_statistics(buf, description, stats, die)
     buf.seek(0)
     return buf

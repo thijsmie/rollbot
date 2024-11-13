@@ -14,7 +14,19 @@ class SQLiteDB:
                 key TEXT PRIMARY KEY,
                 value TEXT
             )
-        """
+            """
+        )
+        self.cursor.execute(
+            """
+            CREATE TABLE IF NOT EXISTS die_stats (
+                day INTEGER NOT NULL,
+                user_or_guild TEXT NOT NULL,
+                die INTEGER NOT NULL,
+                result INTEGER NOT NULL,
+                count INTEGER NOT NULL DEFAULT 0,
+                PRIMARY KEY (day, user_or_guild, die, result)
+            )
+            """
         )
         self.conn.commit()
 

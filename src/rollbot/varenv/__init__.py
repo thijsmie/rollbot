@@ -2,8 +2,10 @@ from rollbot.db import SQLiteDB
 
 
 class VarEnv:
-    def __init__(self, name: str, items: dict[str, str] | None = None) -> None:
+    def __init__(self, name: str, user: str, guild: str, items: dict[str, str] | None = None) -> None:
         self.dirty = False
+        self.guild = guild
+        self.user = user
         self.name = name
         self.items = items or {}
 
@@ -25,13 +27,13 @@ class VarEnvProvider:
     def set_db(self, db):
         self.db = db
 
-    def get(self, name: str) -> VarEnv:
+    def get(self, name: str, user: str, guild: str) -> VarEnv:
         if not self.db:
-            return VarEnv(name)
+            return VarEnv(name, user, guild)
         data = self.db.get(name)
         if not data:
-            return VarEnv(name)
-        return VarEnv(name, data)
+            return VarEnv(name, user, guild)
+        return VarEnv(name, user, guild, items=data)
 
     def update(self, varenv: VarEnv) -> None:
         if varenv.dirty and self.db is not None:

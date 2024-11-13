@@ -6,14 +6,15 @@ from discord import Interaction
 from lark.exceptions import UnexpectedInput
 
 from rollbot.interpreter.calculator import EvaluationError, evaluate
-from rollbot.plottenbakker.asyncing import BakingError, bake_distribution
+from rollbot.plottenbakker.asyncing import BakingError, bake_distribution, bake_statistics
+from rollbot.stat_tracker import stat_tracker
 from rollbot.varenv import VarEnv, var_env_provider
 
 logger = structlog.get_logger()
 
 
 def get_var_env(context: Interaction) -> VarEnv:
-    return var_env_provider.get(str(context.user.id))
+    return var_env_provider.get(str(context.user.id), str(context.user.id), str(context.guild_id))
 
 
 async def roll(context: Interaction, roll: str):
@@ -64,3 +65,39 @@ async def varlist(context: Interaction):
         await context.followup.send("No macros defined")
     else:
         await context.followup.send("\n".join(f"{k} = {v}" for k, v in env.items.items()))
+
+
+async def statistics(context: Interaction, scope: str, die: int, timespan: str):
+    if timespan == "day":
+        days = 1
+    elif timespan == "week":
+        days = 7
+    elif timespan == "month":
+        days = 30
+    else:
+        await context.followup.send("Invalid timespan, can be day, week or month")
+        return
+
+    if scope == "global":
+        scope_name = "Global"
+        stats = stat_tracker.get_global_stats(die, days)
+    elif scope == "guild":
+        scope_name = context.guild.name
+        stats = stat_tracker.get_guild_stats(str(context.guild_id), die, days)
+    elif scope == "user":
+        scope_name = context.user.name
+        stats = stat_tracker.get_user_stats(str(context.user.id), die, days)
+    else:
+        await context.followup.send("Invalid scope, can be global, guild or user")
+        return
+
+    if not stats:
+        await context.followup.send("No data available")
+        return
+
+    rolls = sum(stats.values())
+
+    png = await bake_statistics(
+        f"{scope_name} statistics of a d{die} this {timespan}, rolled {rolls} times.", stats, die
+    )
+    await context.followup.send(file=discord.File(png, filename=f"{secrets.token_urlsafe(8)}.png"))

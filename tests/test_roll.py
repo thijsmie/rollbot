@@ -34,6 +34,6 @@ def test_evaluate_common_damage():
 def test_distribute():
     xbin, bins, t = distribute("1d20", timedelta(seconds=1))
 
-    assert list(range(1, 22)) == xbin
+    assert [0.5 + i for i in range(21)] == xbin
     assert len(bins) == 20
     assert t > 100

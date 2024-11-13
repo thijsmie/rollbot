@@ -17,7 +17,7 @@ if __name__ == "__main__":
     expression = sys.stdin.readline().strip()
 
     try:
-        env = VarEnv(varenv_name)
+        env = VarEnv(varenv_name, "", "")
     except Exception as e:
         print(f"No such environment {e}")
         sys.exit(1)

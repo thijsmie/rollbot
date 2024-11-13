@@ -1,3 +1,5 @@
+from typing import Any
+
 import structlog
 from discord import Interaction
 
@@ -7,7 +9,7 @@ from .main import tree
 logger = structlog.get_logger()
 
 
-def log_action(action, context: Interaction, data: str = ""):
+def log_action(action, context: Interaction, data: Any = ""):
     logger.info(
         "Performing action",
         action=action,
@@ -41,3 +43,10 @@ async def implement_varlist(context: Interaction):
     await context.response.defer(thinking=True)
     log_action("list", context)
     await handlers.varlist(context)
+
+
+@tree.command(name="stats", description="Show statistics for a die.")
+async def implement_stats(context: Interaction, scope: str, die: int, timespan: str):
+    await context.response.defer(thinking=True)
+    log_action("stats", context, {"scope": scope, "die": die, "timespan": timespan})
+    await handlers.statistics(context, scope, die, timespan)

@@ -1,8 +1,10 @@
+import io
+
 import matplotlib.pyplot as plt
 import numpy as np
 
 
-def weighted_avg_and_std(values, weights):
+def weighted_avg_and_std(values: np.array, weights: np.array) -> tuple[float, float]:
     """
     Return the weighted average and standard deviation.
 
@@ -14,7 +16,7 @@ def weighted_avg_and_std(values, weights):
     return (average, np.sqrt(variance))
 
 
-def plot_distribution(io, expression, xbins, data, num_rolls):
+def _plot_distribution(io: io.BytesIO, description: str, xbins: list[float], data: list[int]) -> None:
     fig, ax = plt.subplots()
 
     centroids = (np.array(xbins[1:]) + np.array(xbins[:-1])) / 2.0
@@ -38,14 +40,28 @@ def plot_distribution(io, expression, xbins, data, num_rolls):
         density=True,
     )
 
-    astd = weighted_avg_and_std(xbins[:-1], data)
+    astd = weighted_avg_and_std(centroids, data)
     ax.set_xlabel(f"Roll total, average: {astd[0]:.3f}±{astd[1]:.3f}")
-    ax.set_title(f"Distribution of {expression} rolled {num_rolls} times.")
+    ax.set_title(description)
 
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
     ax.spines["left"].set_visible(False)
     ax.axes.yaxis.set_visible(False)
     ax.axes.yaxis.set_ticks([])
+    ax.xaxis.get_major_locator().set_params(integer=True)
     fig.tight_layout()
     fig.savefig(io, format="png")
+
+
+def plot_distribution(io: io.BytesIO, expression: str, xbins: list[float], data: list[int], num_rolls: int) -> None:
+    _plot_distribution(io, f"Distribution of {expression} rolled {num_rolls} times.", xbins, data)
+
+
+def plot_statistics(io: io.BytesIO, description: str, stats: dict[int, int], die: int) -> None:
+    _plot_distribution(
+        io,
+        description,
+        [0.5 + i for i in range(die + 1)],
+        [stats.get(i, 0) for i in range(1, die + 1)],
+    )

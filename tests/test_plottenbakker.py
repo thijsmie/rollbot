@@ -5,7 +5,7 @@ from rollbot.varenv import VarEnv
 
 
 def test_bake_distribution():
-    img = asyncio.run(bake_distribution("1d20", VarEnv("dummy", {})))
+    img = asyncio.run(bake_distribution("1d20", VarEnv("dummy", "", "", {})))
     # assert valid png
     data = img.getvalue()
     assert data.startswith(b"\x89PNG\r\n\x1a\n")

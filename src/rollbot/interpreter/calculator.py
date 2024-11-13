@@ -11,6 +11,7 @@ import structlog
 from lark import Token, Tree
 from lark.visitors import Interpreter, Transformer
 
+from rollbot.stat_tracker import stat_tracker
 from rollbot.varenv import VarEnv
 
 from .functions import funcs
@@ -75,6 +76,10 @@ class AnnotatedCalculateTree(Interpreter):
         res = sum(r)
         desc = f"{one}{{{','.join(rt)}}}"
         logger.info("roll", roll=one, result=res)
+
+        for v in r:
+            stat_tracker.increment_stat(self._env.guild, self._env.user, b, v)
+
         return res, desc
 
     @visit_children_decor
@@ -88,6 +93,9 @@ class AnnotatedCalculateTree(Interpreter):
         res = random.randint(1, b)
         desc = f"{one}{{{res}}}"
         logger.info("roll", roll=one, result=res)
+
+        stat_tracker.increment_stat(self._env.guild, self._env.user, b, res)
+
         return res, desc
 
     @visit_children_decor
@@ -117,6 +125,10 @@ class AnnotatedCalculateTree(Interpreter):
         res = sum(rl)
         desc = f"{one}{{{','.join(rlt)}|{','.join(rht)}}}"
         logger.info("roll", roll=one, result=res)
+
+        for v in r:
+            stat_tracker.increment_stat(self._env.guild, self._env.user, b, v)
+
         return res, desc
 
     @visit_children_decor
@@ -279,7 +291,7 @@ class AnnotatedCalculateTree(Interpreter):
 
 
 def evaluate(text: str, env: VarEnv = None) -> tuple[int, str] | str:
-    env = env or VarEnv("test")
+    env = env or VarEnv("test", "test", "test")
     tree = parser.parse(text, start="toplevel")
     evaluation = AnnotatedCalculateTree(env).visit(tree)
     logger.info("evaluation", result=evaluation)
@@ -395,7 +407,7 @@ class FastPreProc(Transformer):
     def kroll(self, one: str):
         a, cc = one[0].split("d")
         b, c = cc.split("k")
-        return Tree("roll", (int(c), int(b)))
+        return Tree("kroll", (int(a), int(b), int(c)))
 
     def var(self, tree):
         data = self._env.get(tree[0])
@@ -417,6 +429,14 @@ class FastCalculateTree(Interpreter):
     @visit_children_decor
     def sroll(self, a: int):
         return random.randint(1, a)
+
+    @visit_children_decor
+    def kroll(self, a: int, b: int, c: int):
+        r = tuple(random.randint(1, b) for _ in range(a))
+        r = tuple(sorted(r))
+        border = int(a) - int(c)
+        rl = r[:border]
+        return sum(rl)
 
     @visit_children_decor
     def gt(self, one: int, two: int):
@@ -470,7 +490,7 @@ class FastCalculateTree(Interpreter):
 
 
 def distribute(text: str, timeout: timedelta | None = None, env: VarEnv = None, num_bins: int = 1000):
-    env = env or VarEnv("test")
+    env = env or VarEnv("test", "test", "test")
     timeout = timeout or timedelta(seconds=1)
     tree = parser.parse(text, start="expression")
     minv, maxv = MinMaxTree(env).visit(tree)
@@ -489,7 +509,7 @@ def distribute(text: str, timeout: timedelta | None = None, env: VarEnv = None, 
 
     binw = (maxv - minv) / (num_bins - 1)
 
-    xbin = [minv + binw * i for i in range(num_bins + 1)]
+    xbin = [minv + binw * i - 0.5 for i in range(num_bins + 1)]
     bins = [0] * num_bins
 
     end = datetime.now() + timeout
