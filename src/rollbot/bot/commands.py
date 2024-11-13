@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Literal
 
 import structlog
 from discord import Interaction
@@ -45,8 +45,12 @@ async def implement_varlist(context: Interaction):
     await handlers.varlist(context)
 
 
+type Scope = Literal["global", "user", "guild"]
+type Timespan = Literal["day", "week", "month"]
+
+
 @tree.command(name="stats", description="Show statistics for a die.")
-async def implement_stats(context: Interaction, scope: str, die: int, timespan: str):
+async def implement_stats(context: Interaction, scope: Scope, die: int, timespan: Timespan):
     await context.response.defer(thinking=True)
     log_action("stats", context, {"scope": scope, "die": die, "timespan": timespan})
     await handlers.statistics(context, scope, die, timespan)
