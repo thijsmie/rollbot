@@ -369,15 +369,19 @@ class MinMaxTree(Interpreter):
 
     @visit_children_decor
     def sub(self, one: tuple[int, int], two: tuple[int, int]):
-        return one[0] - two[0], one[1] - two[1]
+        return one[0] - two[1], one[1] - two[0]
 
     @visit_children_decor
     def mul(self, one: tuple[int, int], two: tuple[int, int]):
-        return one[0] * two[0], one[1] * two[1]
+        # With negatives involved, we have to consider all possible combinations
+        extremas = (one[0] * two[0], one[0] * two[1], one[1] * two[0], one[1] * two[1])
+        return min(extremas), max(extremas)
 
     @visit_children_decor
     def div(self, one: tuple[int, int], two: tuple[int, int]):
-        return int(one[0] // two[1]), int(one[1] // two[0])
+        # With negatives involved, we have to consider all possible combinations
+        extremas = (one[0] // two[0], one[0] // two[1], one[1] // two[0], one[1] // two[1])
+        return int(min(extremas)), int(max(extremas))
 
     @visit_children_decor
     def mod(self, one: tuple[int, int], two: tuple[int, int]):
@@ -394,7 +398,7 @@ class MinMaxTree(Interpreter):
     @visit_children_decor
     def pick(self, args):
         args = flatten(args)
-        return min(*(a[0] for a in args)), max(*(a[0] for a in args))
+        return min(*(a[0] for a in args)), max(*(a[1] for a in args))
 
     @visit_children_decor
     def func(self, name: str, args):
@@ -421,6 +425,12 @@ class MinMaxTree(Interpreter):
         except ValueError:
             tree = parser.parse(data, start="program")
             return MinMaxTree(self._env, self._depth + 1).transform(tree)
+
+
+def minmax(text: str, env: VarEnv = None) -> tuple[int, int]:
+    env = env or VarEnv("test", "test", "test")
+    tree = parser.parse(text, start="expression")
+    return MinMaxTree(env).visit(tree)
 
 
 class FastPreProc(Transformer):
@@ -546,7 +556,7 @@ def distribute(text: str, timeout: timedelta | None = None, env: VarEnv = None, 
         return None
 
     if minv == maxv:
-        return None
+        return [minv - 0.5, minv + 0.5], [1], 1
 
     num_bins = min(maxv - minv + 1, num_bins)
 
