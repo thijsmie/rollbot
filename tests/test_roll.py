@@ -1,6 +1,7 @@
 import re
-import pytest
 from datetime import timedelta
+
+import pytest
 
 from rollbot.interpreter.calculator import distribute, evaluate
 
@@ -58,13 +59,6 @@ def test_rrolls():
         assert m
 
 
-@pytest.mark.parametrize("roll", [
-    "4d4rr1",
-    "4d20",
-    "4d4k3",
-    "10000d10000",
-    "3",
-    "d20/20"
-])
+@pytest.mark.parametrize("roll", ["4d4rr1", "4d20", "4d4k3", "10000d10000", "3", "d20/20"])
 def test_distribute_manyrolls(roll):
     distribute(roll, timedelta(seconds=0.3))
