@@ -12,6 +12,7 @@ var.1:  /\w+/
 roll.2: /[0-9]+d[0-9]+/
 sroll.2: /d[0-9]+/
 kroll.3: /[0-9]+d[0-9]+k[0-9]+/
+rroll.4: /[0-9]+d[0-9]+rr[0-9]+/
 
 ?expression: sum
           | expression ">" sum       -> gt
@@ -35,6 +36,7 @@ kroll.3: /[0-9]+d[0-9]+k[0-9]+/
     | kroll
     | roll
     | sroll
+    | rroll
     | var
 
 ?args: expression

@@ -122,11 +122,37 @@ class AnnotatedCalculateTree(Interpreter):
         rh = r[border:]
         rlt = tuple(str(v) for v in rl)
         rht = tuple(str(v) for v in rh)
-        res = sum(rl)
+        res = sum(rh)
         desc = f"{one}{{{','.join(rlt)}|{','.join(rht)}}}"
         logger.info("roll", roll=one, result=res)
 
         for v in r:
+            stat_tracker.increment_stat(self._env.guild, self._env.user, b, v)
+
+        return res, desc
+
+    @visit_children_decor
+    def rroll(self, one: str) -> tuple[int, str]:
+        a, b, c = map(int, re.split("d|rr", one))
+
+        if b == 0:
+            raise EvaluationError("Can't roll a zero-sided die.")
+
+        self.count_complexity(AnnotatedCalculateTree.single_roll_complexity * a * int(b // 20 + 1) * c)
+
+        roll1 = tuple(random.randint(1, b) for _ in range(a))
+        roll2 = tuple(
+            (True, prev_result, random.randint(1, b)) if prev_result <= c else (False, prev_result, prev_result)
+            for prev_result in roll1
+        )
+        rt = tuple(f"{v}({pv})" if rerolled else str(v) for rerolled, pv, v in roll2)
+        res = sum(v[2] for v in roll2)
+        desc = f"{one}{{{','.join(rt)}}}"
+        logger.info("rroll", roll=one, result=res)
+
+        for rerolled, pv, v in roll2:
+            if rerolled:
+                stat_tracker.increment_stat(self._env.guild, self._env.user, b, pv)
             stat_tracker.increment_stat(self._env.guild, self._env.user, b, v)
 
         return res, desc
@@ -320,6 +346,12 @@ class MinMaxTree(Interpreter):
         return int(c), int(c) * int(b)
 
     @visit_children_decor
+    def rroll(self, one: str):
+        a, cc = one.split("d")
+        b, c = cc.split("rr")
+        return int(a), int(a) * int(b)
+
+    @visit_children_decor
     def gt(self, one: tuple[int, int], two: tuple[int, int]):
         return 0, 1
 
@@ -409,6 +441,11 @@ class FastPreProc(Transformer):
         b, c = cc.split("k")
         return Tree("kroll", (int(a), int(b), int(c)))
 
+    def rroll(self, one: str):
+        a, cc = one[0].split("d")
+        b, c = cc.split("rr")
+        return Tree("rroll", (int(a), int(b), int(c)))
+
     def var(self, tree):
         data = self._env.get(tree[0])
         if not data:
@@ -435,8 +472,14 @@ class FastCalculateTree(Interpreter):
         r = tuple(random.randint(1, b) for _ in range(a))
         r = tuple(sorted(r))
         border = int(a) - int(c)
-        rl = r[:border]
-        return sum(rl)
+        rh = r[border:]
+        return sum(rh)
+
+    @visit_children_decor
+    def rroll(self, a: int, b: int, c: int):
+        roll1 = tuple(random.randint(1, b) for _ in range(a))
+        roll2 = tuple(random.randint(1, b) if prev_result <= c else prev_result for prev_result in roll1)
+        return sum(roll2)
 
     @visit_children_decor
     def gt(self, one: int, two: int):
