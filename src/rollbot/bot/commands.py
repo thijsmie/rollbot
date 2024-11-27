@@ -45,6 +45,13 @@ async def implement_varlist(context: Interaction):
     await handlers.varlist(context)
 
 
+@tree.command(name="unset", description="Unset a macros.")
+async def implement_unset(context: Interaction, macro: str):
+    await context.response.defer(thinking=True)
+    log_action("unset", context)
+    await handlers.unset(context, macro)
+
+
 type Scope = Literal["global", "user", "guild"]
 type Timespan = Literal["day", "week", "month"]
 

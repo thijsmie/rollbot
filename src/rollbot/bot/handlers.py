@@ -17,7 +17,7 @@ def get_var_env(context: Interaction) -> VarEnv:
     return var_env_provider.get(str(context.user.id), str(context.user.id), str(context.guild_id))
 
 
-async def roll(context: Interaction, roll: str):
+async def roll(context: Interaction, roll: str) -> None:
     env = get_var_env(context)
 
     try:
@@ -38,7 +38,7 @@ async def roll(context: Interaction, roll: str):
         await context.followup.send("Could not deliver result")
 
 
-async def distribution(context: Interaction, roll: str):
+async def distribution(context: Interaction, roll: str) -> None:
     env = get_var_env(context)
 
     try:
@@ -58,7 +58,7 @@ async def distribution(context: Interaction, roll: str):
         await context.followup.send("Could not deliver result")
 
 
-async def varlist(context: Interaction):
+async def varlist(context: Interaction) -> None:
     env = get_var_env(context)
     items = env.items
     if not items:
@@ -67,7 +67,17 @@ async def varlist(context: Interaction):
         await context.followup.send("\n".join(f"{k} = {v}" for k, v in env.items.items()))
 
 
-async def statistics(context: Interaction, scope: str, die: int, timespan: str):
+async def unset(context: Interaction, variable: str) -> None:
+    env = get_var_env(context)
+    if variable in env.items:
+        env.unset(variable)
+        var_env_provider.update(env)
+        await context.followup.send(f"Deleted {variable}")
+    else:
+        await context.followup.send(f"No such macro {variable}")
+
+
+async def statistics(context: Interaction, scope: str, die: int, timespan: str) -> None:
     if timespan == "day":
         days = 1
     elif timespan == "week":

@@ -16,6 +16,11 @@ class VarEnv:
         self.items[key] = value
         self.dirty = True
 
+    def unset(self, key: str) -> None:
+        if key in self.items:
+            del self.items[key]
+            self.dirty = True
+
     def get(self, key: str) -> str | None:
         return self.items.get(key)
 
