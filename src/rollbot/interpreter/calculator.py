@@ -160,19 +160,19 @@ class AnnotatedCalculateTree(Interpreter):
     @visit_children_decor
     def gt(self, one: tuple[int, str], two: tuple[int, str]) -> tuple[int, str]:
         self.count_complexity(1)
-        descr = f"({one[1]} > {two[1]})"
+        descr = f"{one[1]} > {two[1]}"
         return (1 if one[0] > two[0] else 0), descr
 
     @visit_children_decor
     def lt(self, one: tuple[int, str], two: tuple[int, str]) -> tuple[int, str]:
         self.count_complexity(1)
-        descr = f"({one[1]} < {two[1]})"
+        descr = f"{one[1]} < {two[1]}"
         return (1 if one[0] < two[0] else 0), descr
 
     @visit_children_decor
     def eq(self, one: tuple[int, str], two: tuple[int, str]) -> tuple[int, str]:
         self.count_complexity(1)
-        descr = f"({one[1]} == {two[1]})"
+        descr = f"{one[1]} == {two[1]}"
         return (1 if one[0] == two[0] else 0), descr
 
     @visit_children_decor

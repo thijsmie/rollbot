@@ -21,6 +21,7 @@ structlog = "^24.4.0"
 [tool.poetry.group.dev.dependencies]
 ruff = "^0.7"
 pytest = "^8.3.3"
+pytest-cov = "^6.0.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
@@ -38,3 +39,11 @@ dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
 
 [tool.ruff.lint.mccabe]
 max-complexity = 10
+
+[tool.pytest.ini_options]
+addopts = "--cov=rollbot --cov-report xml --cov-report term-missing --cov-fail-under=75 --cov-branch"
+
+[tool.coverage.run]
+omit = [
+    "src/rollbot/bot/*",
+]
