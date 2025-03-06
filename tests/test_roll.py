@@ -75,6 +75,16 @@ def test_rrolls():
         assert m
 
 
-@pytest.mark.parametrize("roll", ["4d4rr1", "4d20", "4d4k3", "10000d10000", "3", "d20/20", "8d6rr1-8d6"])
+def test_exploding_rolls():
+    regex = r"4d6!{((?:\d+(?:,|\|))+)(\d+)} › \*\*(\d+)\*\*"
+    for _ in range(1000):
+        res = evaluate("4d6!")
+        m = re.match(regex, res)
+        assert m
+        rolls = re.split(r"[,|]", m.group(1))
+        assert len(rolls) >= 4
+
+
+@pytest.mark.parametrize("roll", ["4d4rr1", "4d20", "4d4k3", "10000d10000", "3", "d20/20", "8d6rr1-8d6", "4d6!"])
 def test_distribute_manyrolls(roll):
     assert distribute(roll, timedelta(seconds=0.3)) is not None

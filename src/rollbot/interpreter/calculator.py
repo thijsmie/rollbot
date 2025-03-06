@@ -1,4 +1,5 @@
 import functools
+import math
 import operator
 import re
 from collections.abc import Callable
@@ -154,6 +155,32 @@ class AnnotatedCalculateTree(Interpreter):
             if rerolled:
                 stat_tracker.increment_stat(self._env.guild, self._env.user, b, pv)
             stat_tracker.increment_stat(self._env.guild, self._env.user, b, v)
+
+        return res, desc
+
+    @visit_children_decor
+    def exroll(self, one: str) -> tuple[int, str]:
+        a, b = map(int, re.split("d", one.rstrip("!")))
+
+        if b < 2:
+            raise EvaluationError("Die must have at least two sides")
+
+        to_roll = a
+        rolls = []
+
+        while to_roll > 0:
+            self.count_complexity(AnnotatedCalculateTree.single_roll_complexity * a * int(b // 20 + 1))
+            r = tuple(random.randint(1, b) for _ in range(to_roll))
+            rolls.append(r)
+            to_roll = sum(1 for v in r if v == b)
+
+        res = sum(sum(r) for r in rolls)
+        rt = [tuple(str(v) for v in r) for r in rolls]
+        desc = f"{one}{{{'|'.join(','.join(r) for r in rt)}}}"
+
+        for r in rolls:
+            for v in r:
+                stat_tracker.increment_stat(self._env.guild, self._env.user, b, v)
 
         return res, desc
 
@@ -352,6 +379,21 @@ class MinMaxTree(Interpreter):
         return int(a), int(a) * int(b)
 
     @visit_children_decor
+    def exroll(self, one: str) -> tuple[int, str]:
+        # Max is technically infinite, but we'll pick a reasonable upper bound
+        a, b = map(int, re.split("d", one.rstrip("!")))
+
+        if b < 2:
+            raise EvaluationError("Die must have at least two sides")
+
+        # Explode chance
+        single_chance = 1 / b
+        limit = 0.01
+        maxv = math.ceil(math.log(limit) / math.log(single_chance)) * b * a
+
+        return a, int(maxv)
+
+    @visit_children_decor
     def gt(self, one: tuple[int, int], two: tuple[int, int]):
         return 0, 1
 
@@ -456,6 +498,10 @@ class FastPreProc(Transformer):
         b, c = cc.split("rr")
         return Tree("rroll", (int(a), int(b), int(c)))
 
+    def exroll(self, one: str):
+        a, b = map(int, re.split("d", one[0].rstrip("!")))
+        return Tree("exroll", (a, b))
+
     def var(self, tree):
         data = self._env.get(tree[0])
         if not data:
@@ -490,6 +536,17 @@ class FastCalculateTree(Interpreter):
         roll1 = tuple(random.randint(1, b) for _ in range(a))
         roll2 = tuple(random.randint(1, b) if prev_result <= c else prev_result for prev_result in roll1)
         return sum(roll2)
+
+    @visit_children_decor
+    def exroll(self, a: int, b: int) -> int:
+        to_roll = a
+        total = 0
+        while to_roll > 0:
+            r = tuple(random.randint(1, b) for _ in range(to_roll))
+            to_roll = sum(1 for v in r if v == b)
+            total += sum(r)
+
+        return total
 
     @visit_children_decor
     def gt(self, one: int, two: int):
@@ -571,6 +628,6 @@ def distribute(text: str, timeout: timedelta | None = None, env: VarEnv = None, 
     while datetime.now() < end:
         t += 1
         v = fct.visit(tree)
-        bins[int((v - minv) / binw)] += 1
+        bins[min(int((v - minv) / binw), len(bins) - 1)] += 1
 
     return xbin, bins, t
