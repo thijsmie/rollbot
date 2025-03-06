@@ -11,7 +11,7 @@ def fn_min(args: list[int]) -> int:
 
 
 def fn_fac(args: list[int]) -> int:
-    if args:
+    if args and args[0] >= 0:
         return factorial(args[0])
     return 1
 
