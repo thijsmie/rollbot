@@ -55,14 +55,59 @@ jobs:
       - name: Publish
         run: |-
           docker push "us-central1-docker.pkg.dev/$PROJECT_ID/rollbot-vm/$GCE_INSTANCE-image:$GITHUB_SHA"
-      - name: Update startup script to prune and update IP address
-        run: |-
-          gcloud compute instances add-metadata $GCE_INSTANCE \
-            --zone "$GCE_INSTANCE_ZONE" \
-            --metadata=startup-script="#! /bin/bash
-              docker image prune -af"
       - name: Deploy
         run: |-
-          gcloud compute instances update-container "$GCE_INSTANCE" \
+          IMAGE="us-central1-docker.pkg.dev/$PROJECT_ID/rollbot-vm/$GCE_INSTANCE-image:$GITHUB_SHA"
+          NEW_NAME="rollbot-${GITHUB_SHA:0:8}"
+          # Update startup script so the correct image is used on any future reboot
+          gcloud compute instances add-metadata "$GCE_INSTANCE" \
             --zone "$GCE_INSTANCE_ZONE" \
-            --container-image "us-central1-docker.pkg.dev/$PROJECT_ID/rollbot-vm/$GCE_INSTANCE-image:$GITHUB_SHA"
+            --metadata=startup-script="#! /bin/bash
+              export HOME=/home/appuser
+              docker-credential-gcr configure-docker --registries us-central1-docker.pkg.dev
+              docker stop \$(docker ps -q) || true
+              docker rm \$(docker ps -aq) || true
+              docker image prune -af
+              docker pull $IMAGE
+              docker run -d \
+                --name rollbot \
+                --restart always \
+                --volume /mnt/data:/etc/data \
+                $IMAGE"
+          # Zero-downtime: start new container alongside the old one, wait for it
+          # to connect to Discord, then stop everything else.
+          gcloud compute ssh "$GCE_INSTANCE" \
+            --zone "$GCE_INSTANCE_ZONE" \
+            --command "
+              set -e
+              export HOME=/home/appuser
+              docker-credential-gcr configure-docker --registries us-central1-docker.pkg.dev
+
+              docker pull $IMAGE
+              docker run -d \
+                --name $NEW_NAME \
+                --restart always \
+                --volume /mnt/data:/etc/data \
+                $IMAGE
+
+              echo 'Waiting for $NEW_NAME to be ready...'
+              for i in \$(seq 1 60); do
+                if docker logs $NEW_NAME 2>&1 | grep -q 'Logged in'; then
+                  echo 'Ready.'
+                  break
+                fi
+                if [ \$i -eq 60 ]; then
+                  echo 'Timed out waiting for $NEW_NAME.' >&2
+                  docker stop $NEW_NAME || true
+                  docker rm $NEW_NAME || true
+                  exit 1
+                fi
+                sleep 1
+              done
+
+              # Stop all containers except the new one
+              NEW_ID=\$(docker inspect --format='{{.Id}}' $NEW_NAME | head -c 12)
+              docker ps -q | grep -v \$NEW_ID | xargs -r docker stop
+
+              docker image prune -af
+            "

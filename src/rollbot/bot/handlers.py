@@ -1,3 +1,4 @@
+import asyncio
 import secrets
 
 import discord
@@ -21,8 +22,14 @@ async def roll(context: Interaction, roll: str) -> None:
     env = get_var_env(context)
 
     try:
-        result = evaluate(roll, env)
+        loop = asyncio.get_event_loop()
+        result = await asyncio.wait_for(
+            loop.run_in_executor(None, evaluate, roll, env),
+            timeout=10.0,
+        )
         var_env_provider.update(env)
+    except asyncio.TimeoutError:
+        result = "Roll timed out: calculation exceeded the 10 second limit."
     except EvaluationError as e:
         result = e.args[0]
     except UnexpectedInput as e:
