@@ -12,8 +12,9 @@ var.1:  /\w+/
 roll.2: /[0-9]+d[0-9]+/
 sroll.2: /d[0-9]+/
 kroll.3: /[0-9]+d[0-9]+k[0-9]+/
-rroll.4: /[0-9]+d[0-9]+rr[0-9]+/
-exroll.5: /[0-9]+d[0-9]+!/
+klroll.4: /[0-9]+d[0-9]+kl[0-9]+/
+rroll.5: /[0-9]+d[0-9]+rr[0-9]+/
+exroll.6: /[0-9]+d[0-9]+!/
 
 ?expression: sum
           | expression ">" sum       -> gt
@@ -35,6 +36,7 @@ exroll.5: /[0-9]+d[0-9]+!/
     | NAME "(" args? ")"    -> func
     | "(" expression ")"    -> brace
     | kroll
+    | klroll
     | roll
     | sroll
     | rroll

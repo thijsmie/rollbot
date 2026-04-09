@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-def weighted_avg_and_std(values: np.array, weights: np.array) -> tuple[float, float]:
+def weighted_avg_and_std(values: np.ndarray, weights: np.ndarray) -> tuple[float, float]:
     """
     Return the weighted average and standard deviation.
 

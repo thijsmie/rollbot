@@ -11,7 +11,7 @@ from rollbot.varenv import VarEnv
 if __name__ == "__main__":
     # Disable all logging in distributer process
     logging.disable(logging.CRITICAL)
-    structlog.configure(logger_factory=lambda: logging.getLogger())
+    structlog.configure(logger_factory=logging.getLogger)
 
     varenv_name = sys.stdin.readline().strip()
     expression = sys.stdin.readline().strip()

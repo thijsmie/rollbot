@@ -133,6 +133,39 @@ class AnnotatedCalculateTree(Interpreter):
         return res, desc
 
     @visit_children_decor
+    def klroll(self, one: str) -> tuple[int, str]:
+        a, b, c = map(int, re.split("kl|d", one))
+
+        if b == 0:
+            raise EvaluationError("Can't roll a zero-sided die.")
+
+        if c > a:
+            raise EvaluationError("Can't drop more than keeping.")
+
+        self.count_complexity(
+            # roll
+            AnnotatedCalculateTree.single_roll_complexity * a * int(b // 20 + 1)
+            # sort
+            + a * a * 2
+        )
+
+        r = tuple(random.randint(1, b) for _ in range(a))
+        r = tuple(sorted(r, reverse=True))
+        border = int(a) - int(c)
+        rl = r[:border]
+        rh = r[border:]
+        rlt = tuple(str(v) for v in rl)
+        rht = tuple(str(v) for v in rh)
+        res = sum(rh)
+        desc = f"{one}{{{','.join(rlt)}|{','.join(rht)}}}"
+        logger.info("roll", roll=one, result=res)
+
+        for v in r:
+            stat_tracker.increment_stat(self._env.guild, self._env.user, b, v)
+
+        return res, desc
+
+    @visit_children_decor
     def rroll(self, one: str) -> tuple[int, str]:
         a, b, c = map(int, re.split("d|rr", one))
 
@@ -368,14 +401,20 @@ class MinMaxTree(Interpreter):
 
     @visit_children_decor
     def kroll(self, one: str):
-        a, cc = one.split("d")
+        _a, cc = one.split("d")
+        b, c = cc.split("k")
+        return int(c), int(c) * int(b)
+
+    @visit_children_decor
+    def klroll(self, one: str):
+        _a, cc = one.split("d")
         b, c = cc.split("k")
         return int(c), int(c) * int(b)
 
     @visit_children_decor
     def rroll(self, one: str):
         a, cc = one.split("d")
-        b, c = cc.split("rr")
+        b, _c = cc.split("rr")
         return int(a), int(a) * int(b)
 
     @visit_children_decor
@@ -469,7 +508,7 @@ class MinMaxTree(Interpreter):
             return MinMaxTree(self._env, self._depth + 1).transform(tree)
 
 
-def minmax(text: str, env: VarEnv = None) -> tuple[int, int]:
+def minmax(text: str, env: VarEnv | None = None) -> tuple[int, int]:
     env = env or VarEnv("test", "test", "test")
     tree = parser.parse(text, start="expression")
     return MinMaxTree(env).visit(tree)
@@ -492,6 +531,11 @@ class FastPreProc(Transformer):
         a, cc = one[0].split("d")
         b, c = cc.split("k")
         return Tree("kroll", (int(a), int(b), int(c)))
+
+    def klroll(self, one: str):
+        a, cc = one[0].split("d")
+        b, c = cc.split("k")
+        return Tree("klroll", (int(a), int(b), int(c)))
 
     def rroll(self, one: str):
         a, cc = one[0].split("d")
@@ -527,6 +571,14 @@ class FastCalculateTree(Interpreter):
     def kroll(self, a: int, b: int, c: int):
         r = tuple(random.randint(1, b) for _ in range(a))
         r = tuple(sorted(r))
+        border = int(a) - int(c)
+        rh = r[border:]
+        return sum(rh)
+
+    @visit_children_decor
+    def klroll(self, a: int, b: int, c: int):
+        r = tuple(random.randint(1, b) for _ in range(a))
+        r = tuple(sorted(r, reverse=True))
         border = int(a) - int(c)
         rh = r[border:]
         return sum(rh)

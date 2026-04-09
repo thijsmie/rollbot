@@ -15,8 +15,14 @@ async def bake_distribution(expression: str, env: VarEnv) -> BytesIO:
         "rollbot.plottenbakker.distributer",
         stdin=asyncio.subprocess.PIPE,
         stdout=asyncio.subprocess.PIPE,
+        stderr=asyncio.subprocess.DEVNULL,
     )
-    stdout, _ = await bakery.communicate(f"{env.name}\n{expression}\n".encode())
+    try:
+        stdout, _ = await bakery.communicate(f"{env.name}\n{expression}\n".encode())
+    finally:
+        if bakery.returncode is None:
+            bakery.kill()
+            await bakery.wait()
     if bakery.returncode != 0:
         raise BakingError(stdout.decode())
 

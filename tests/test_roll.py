@@ -67,6 +67,16 @@ def test_krolls():
         assert int(m.group(2)) + int(m.group(3)) + int(m.group(4)) == int(m.group(5))
 
 
+def test_klrolls():
+    regex = re.compile(r"4d4kl3{(\d)\|(\d),(\d),(\d)} › \*\*(\d+)\*\*")
+    for _ in range(1000):
+        res = evaluate("4d4kl3")
+        m = regex.match(res)
+        assert m
+        assert 3 <= int(m.group(5)) <= 18
+        assert int(m.group(2)) + int(m.group(3)) + int(m.group(4)) == int(m.group(5))
+
+
 def test_rrolls():
     regex = r"4d4rr1{(\d)(\(\d\))?,(\d)(\(\d\))?,(\d)(\(\d\))?,(\d)(\(\d\))?} › \*\*(\d+)\*\*"
     for _ in range(1000):
