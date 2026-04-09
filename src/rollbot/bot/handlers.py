@@ -28,7 +28,7 @@ async def roll(context: Interaction, roll: str) -> None:
             timeout=10.0,
         )
         var_env_provider.update(env)
-    except asyncio.TimeoutError:
+    except TimeoutError:
         result = "Roll timed out: calculation exceeded the 10 second limit."
     except EvaluationError as e:
         result = e.args[0]
